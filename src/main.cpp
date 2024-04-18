@@ -3,7 +3,7 @@
 #include "MeRGBLineFollower.h"
 
 // mame robota cislo 11
-// AAAAAAAAAAAAAA
+// AAAAAAAAAAAAAAbfnne
 // BBBBBBBBBBBBBBB
 // Levý motor
 const int pwmMotorPravy = 11;
