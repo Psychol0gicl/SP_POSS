@@ -190,8 +190,8 @@ void setup() {
 
 }
 
-void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
-                                          // doprava - pravy opacny
+void pohyb(int rychlostL, int rychlostR){ // pro otaceni doleva - levy zaporny
+                                          // pro otaceni doprava - pravy zaporny
 
   if(rychlostL < 0){
     levyMotorVzad(abs(rychlostL));
@@ -208,6 +208,47 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
     }
 }
 
+
+void otacej_dokud_nenajdes_caru(byte position){  // NOT WORKING
+  // 1001 jsme na care
+  // 1111 jsme mimo caru
+  // 0000 krizovatka
+  // byte cara = 0b1001;
+  if ( (position & 0b1001) == 0b1111 ){
+    pohyb(0,0);
+  } else {
+    pohyb(-120, 120);
+  }
+}
+
+void svit(byte position){
+  if(0b00001000 & position){
+      LED(5, red);
+      }
+    else{
+      LED(5, blue);
+      }
+
+    if(0b00000100 & position){
+      LED(4, red);
+      }
+    else{
+      LED(4, blue);
+      }
+
+    if(0b00000010 & position){
+      LED(2, red);
+      }
+    else{
+      LED(2, blue);
+      }
+    if(0b00000001 & position){
+      LED(1, red);
+      }
+    else{
+      LED(1, blue);
+    }
+}
   /*
   LED(1, amber*0.5); // 300
   LED(2, orange*0.5); // 330
@@ -224,7 +265,7 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
   */
 
   byte position = 0;
-  float jas = 0.05;
+  float jas =  0;
 
 void loop() {
   // sejmutí dat z detektoru cary
@@ -233,13 +274,8 @@ void loop() {
   delay(10);
   
   position = RGBLineFollower.getPositionState();
-  if(0b00001000 & position){LED(5, red*0.05);}
-  else{LED(5, blue*0.05);}
-  if(0b00000100 & position){LED(4, red*0.05);}
-  else{LED(4, blue*0.05);}
-  if(0b00000010 & position){LED(2, red*0.05);}
-  else{LED(2, blue*0.05);}
-  if(0b00000001 & position){LED(1, red*0.05);}
-  else{LED(1, blue*0.05);}
+  
+  svit(position);
+  otacej_dokud_nenajdes_caru(position);
   
 }
