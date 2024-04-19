@@ -259,6 +259,7 @@ void otacej_dokud_nenajdes_caru(byte position){
   // 1111 jsme mimo caru
   // 0000 krizovatka
   // byte cara = 0b1001;
+  // obsolete => otacej dle offsetu 
   boolean leva = (position & 0b01000); 
   boolean stred1 = (position & 0b00100);
   boolean stred2 = (position & 0b00010);
@@ -268,6 +269,15 @@ void otacej_dokud_nenajdes_caru(byte position){
   } else {
     pohyb(-120, 120);
   }
+}
+
+void otacej_dle_offsetu(int offset){
+  if ( (offset < 10) & (-10 < offset)){
+    pohyb(0,0);
+  } else {
+    pohyb(-120, 120);
+  }
+
 }
 
 void svit(byte position){
@@ -315,7 +325,7 @@ void svit(byte position){
 
   byte position = 0;
   float jas =  0;
-
+  int offset = 0;
 
 
 void loop() {
@@ -325,14 +335,10 @@ void loop() {
   delay(10);
   
   position = RGBLineFollower.getPositionState();
-  
-  svit(position);
-  otacej_dokud_nenajdes_caru(position);
-  
-  
+  offset = RGBLineFollower.getPositionOffset();
 
-  Serial.print(pulseCountL);
-  Serial.print(" || ");
-  Serial.println(pulseCountR);
-  encMSG = false;
+  svit(position);
+  // otacej_dokud_nenajdes_caru(position);
+  otacej_dle_offsetu(offset);
+  
 }
