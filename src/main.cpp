@@ -171,24 +171,6 @@ void pravyMotorStop() {
 }
 
 
-void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
-                                          // doprava - pravy opacny
-  if(rychlostL < 0){
-    levyMotorVzad(abs(rychlostL));
-    }
-  else{
-    levyMotorVpred(rychlostL);
-    }
-
-  if(rychlostR < 0){
-    pravyMotorVzad(abs(rychlostR));
-    }
-  else{
-    pravyMotorVpred(rychlostR);
-    }
-}
-
-
 void setup() {
   // nastav piny narazniku
   pinMode(pravyNaraznik,INPUT_PULLUP);
@@ -249,7 +231,7 @@ void setup() {
     // nepokracuj dokud neni stiknut levy naraznik
   }
   
-  pohyb(100, 100);
+  // pohyb(100, 100);
 
 }
 
@@ -272,12 +254,16 @@ void pohyb(int rychlostL, int rychlostR){ // pro otaceni doleva - levy zaporny
 }
 
 
-void otacej_dokud_nenajdes_caru(byte position){  // NOT WORKING
+void otacej_dokud_nenajdes_caru(byte position){ 
   // 1001 jsme na care
   // 1111 jsme mimo caru
   // 0000 krizovatka
   // byte cara = 0b1001;
-  if ( (position & 0b1001) == 0b1111 ){
+  boolean leva = (position & 0b01000); 
+  boolean stred1 = (position & 0b00100);
+  boolean stred2 = (position & 0b00010);
+  boolean prava = (position & 0b00001);
+  if ( leva & !stred1 & !stred2 & prava ){
     pohyb(0,0);
   } else {
     pohyb(-120, 120);
