@@ -88,12 +88,54 @@ MeBuzzer buzzer;
 // Gyro
 MeGyro gyro(1,0x69);
 
-// osetreni preruseni od kanalu A enkoderu na pravem motoru
+volatile bool encMSG = false;
+volatile int pulseCountR = 0;
+volatile bool stateAR = false;
+volatile bool stateBR = false;
+volatile bool oldStateAR = false;
+volatile int pulseCountL = 0;
+volatile bool stateAL = false;
+volatile bool stateBL = false;
+volatile bool oldStateAL = false;
+// osetreni preruseni od kanalu A enkoderu na pravem motoru - POZOR - enkoder se toci opacne
 void pravyEncoderAInt() {
+  cli(); // zakaz zpracovani dalsich preruseni
+  stateAR = digitalRead(pravyEnkoderA); // nacteni stanu kanalu A
+  if (digitalRead(pravyEnkoderB)){ // vyhodnot pro B=HIGH
+  if ( (oldStateAR - stateAR) < 0) // jaky je typ hrany na kanalu A
+  pulseCountR--; // vzestupna -> pricti puls
+  else
+  pulseCountR++; // sestupna -> odecti puls
+  } else { // vyhodnot pro B=LOW
+  if ( (oldStateAR - stateAR) > 0) // jaky je typ hrany na kanalu A
+  pulseCountR--; // sestupna -> pricti puls
+  else
+  pulseCountR++; // vzestupna -> odecti puls
+  }
+  oldStateAR = stateAR; // uchovej stav kanalu A pro pristi test hrany
+  encMSG = true;
+  sei(); // opet povol zpracovani dalsich preruseni
 }
 
+
 // osetreni preruseni od kanalu A enkoderu na levem motoru
-void levyEncoderAInt() {
+void levyEncoderAInt() { 
+  cli(); // zakaz zpracovani dalsich preruseni
+  stateAL = digitalRead(levyEnkoderA); // nacteni stanu kanalu A
+  if (digitalRead(levyEnkoderB)){ // vyhodnot pro B=HIGH
+  if ( (oldStateAL - stateAL) < 0) // jaky je typ hrany na kanalu A
+  pulseCountL++; // vzestupna -> pricti puls
+  else
+  pulseCountL--; // sestupna -> odecti puls
+  } else { // vyhodnot pro B=LOW
+  if ( (oldStateAL - stateAL) > 0) // jaky je typ hrany na kanalu A
+  pulseCountL++; // sestupna -> pricti puls
+  else
+  pulseCountL--; // vzestupna -> odecti puls
+  }
+  oldStateAL = stateAL; // uchovej stav kanalu A pro pristi test hrany
+  encMSG = true;
+  sei(); // opet povol zpracovani dalsich preruseni
 }
 
 void levyMotorVpred(int rychlost) {
@@ -127,6 +169,25 @@ void pravyMotorVzad(int rychlost) {
 void pravyMotorStop() {
   analogWrite(pwmMotorPravy, 0);
 }
+
+
+void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
+                                          // doprava - pravy opacny
+  if(rychlostL < 0){
+    levyMotorVzad(abs(rychlostL));
+    }
+  else{
+    levyMotorVpred(rychlostL);
+    }
+
+  if(rychlostR < 0){
+    pravyMotorVzad(abs(rychlostR));
+    }
+  else{
+    pravyMotorVpred(rychlostR);
+    }
+}
+
 
 void setup() {
   // nastav piny narazniku
@@ -188,25 +249,10 @@ void setup() {
     // nepokracuj dokud neni stiknut levy naraznik
   }
 
+  pohyb(100, 100);
 }
 
-void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
-                                          // doprava - pravy opacny
 
-  if(rychlostL < 0){
-    levyMotorVzad(abs(rychlostL));
-    }
-  else{
-    levyMotorVpred(rychlostL);
-    }
-
-  if(rychlostR < 0){
-    pravyMotorVzad(abs(rychlostR));
-    }
-  else{
-    pravyMotorVpred(rychlostR);
-    }
-}
 
   /*
   LED(1, amber*0.5); // 300
@@ -226,6 +272,8 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
   byte position = 0;
   float jas = 0.05;
 
+
+
 void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
@@ -241,5 +289,9 @@ void loop() {
   else{LED(2, blue*0.05);}
   if(0b00000001 & position){LED(1, red*0.05);}
   else{LED(1, blue*0.05);}
-  
+
+  Serial.print(pulseCountL);
+  Serial.print(" || ");
+  Serial.println(pulseCountR);
+  encMSG = false;
 }
