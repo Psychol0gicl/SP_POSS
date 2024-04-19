@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "MeAuriga.h"
 #include "MeRGBLineFollower.h"
+#include "TimerThree.h"
 
 #include "movement.h"
 #include "encoder.h"
