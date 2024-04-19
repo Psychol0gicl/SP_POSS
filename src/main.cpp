@@ -5,8 +5,35 @@
 
 #include "movement.h"
 #include "encoder.h"
+#include "regulation.h"
 
 // mame robota cislo 11
+
+
+int microseconds = 1000;              // perioda casovace regulatoru
+float Ts = microseconds / 1000000.0; // perioda vzorkovani pro vypocet param regulatoru
+
+// Parametry spojiteho PID regulatoru - paralelni forma s filtrovanou D slozkou - treba zjistit, tyto jsou placeholder
+volatile float Kp = 33;
+float Ki = 38;
+float Kd = 6.6;
+float Tf = 0.04;
+
+//Fyzikalni parametry PID na interni diskretni zesileni
+volatile const float ci=Ki*Ts/2; 
+volatile const float cd1=-(Ts-2*Tf)/(Ts+2*Tf); 
+volatile const float cd2=2*Kd/(Ts+2*Tf);
+
+volatile float wk = 0;    // pozad hodnota
+volatile float yk = 0;    // hodnota ze zpetne vazby - pravdepodobne offset z cidla
+volatile float ek = 0;    // reg odchylka
+volatile float ekm1 = 0;  // minula hodnota reg odchylky
+
+//globalni promenne pro interni stav integratoru a derivatoru
+volatile float yi = 0; 
+volatile float yd = 0;
+volatile float yp = 0;
+volatile float uk = 0; // vystup regulatoru
 
 // Levý motor
 const int pwmMotorPravy = 11;
@@ -201,10 +228,15 @@ void setup() {
   // inicializace sériového kanálu
   Serial.begin(9600);
 
+  // inicializace casovace pro regulator
+  Timer3.initialize(microseconds);
+  Timer3.attachInterrupt(calc_pid); 
+  
+
   while (digitalRead(levyNaraznik)) {
     // nepokracuj dokud neni stiknut levy naraznik
   }
-  
+  Timer3.start(); 
   // pohyb(100, 100);
 
 }
