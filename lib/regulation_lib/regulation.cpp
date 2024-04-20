@@ -3,6 +3,7 @@
 #include "MeRGBLineFollower.h"
 
 void calc_pid(){    // bude se pocitat pri timer interruptu
+  cli(); // zakaz zpracovani dalsich preruseni
   //Reg. odchylka
   yk = RGBLineFollower.getPositionOffset(); // zatim nevim, jestli to zjistovat zde nebo mimo
   ek = wk - yk;
@@ -15,4 +16,5 @@ void calc_pid(){    // bude se pocitat pri timer interruptu
 
   uk = yp+yi+yd; //celkovy aktualni akcni zasah - vystup regulatoru
   ekm1 = ek;
+  sei(); // opet povol zpracovani dalsich preruseni
 }

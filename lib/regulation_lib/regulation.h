@@ -3,26 +3,26 @@
 extern MeRGBLineFollower RGBLineFollower;
 
 //Fyzikalni parametry PID na interni diskretni zesileni - bude vypocteno jen jednou pri inicializaci
-extern const float ci;
-extern const float cd1;
-extern const float cd2;
+extern volatile const float ci;
+extern volatile const float cd1;
+extern volatile const float cd2;
 
-extern float wk;    // pozad hodnota
-//extern float wkm1;  // minula pozad hodnota
-extern float yk;    // hodnota ze zpetne vazby - pravdepodobne offset z cidla
-//extern float ykm1;  // minula hodnota z cidla
-extern float ek;    // reg odchylka
-extern float ekm1;  // minula hodnota reg odchylky
+extern volatile float wk;    // pozad hodnota
+//extern volatile float wkm1;  // minula pozad hodnota
+extern volatile float yk;    // hodnota ze zpetne vazby - pravdepodobne offset z cidla
+//extern volatile float ykm1;  // minula hodnota z cidla
+extern volatile float ek;    // reg odchylka
+extern volatile float ekm1;  // minula hodnota reg odchylky
 
 //globalni promenne pro interni stav integratoru a derivatoru
-extern float yi; 
-extern float yd;
-extern float yp;
+extern volatile float yi; 
+extern volatile float yd;
+extern volatile float yp;
 
 // Parametry spojiteho PID regulatoru - paralelni forma s filtrovanou D slozkou - potreba jen proporcionalni slozka
-extern float Kp;
+extern volatile float Kp;
 
-extern float uk; // vystup
+extern volatile float uk; // vystup
 
 void calc_pid(); // bude se pocitat pri timer interruptu
 
