@@ -31,6 +31,7 @@ volatile float yi = 0;
 volatile float yd = 0;
 volatile float yp = 0;
 volatile float uk = 0; // vystup regulatoru
+volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
 
 // Levý motor
 const int pwmMotorPravy = 11;
@@ -43,6 +44,7 @@ const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
 int rychlostJizdy = 200;
+byte smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
 
@@ -116,6 +118,7 @@ MeBuzzer buzzer;
 // Gyro
 MeGyro gyro(1,0x69);
 
+// pro enkodery
 volatile bool encMSG = false;
 volatile int pulseCountR = 0;
 volatile bool stateAR = false;
@@ -233,8 +236,8 @@ void setup() {
   while (digitalRead(levyNaraznik)) {
     // nepokracuj dokud neni stiknut levy naraznik
   }
-  Timer3.start(); 
-  // pohyb(100, 100);
+  //Timer3.start(); 
+  //pohyb(100, 100);
 
 }
 
@@ -282,10 +285,16 @@ void svit(byte position){
   LED(12, yellow*0.5);    // 270
   */
 
-  byte position = 0;
-  float jas =  0;
-  int offset = 0;
+byte position = 0;
+float jas =  0;
+int offset = 0;
 
+
+#define forward     0
+#define backward    1
+
+byte state = forward;
+bool mapping = true;
 
 void loop() {
   // sejmutí dat z detektoru cary
@@ -300,4 +309,24 @@ void loop() {
   // otacej_dokud_nenajdes_caru(position);
   otacej_dle_offsetu(offset);
   
+  if(mapping){// mapovaci rezim
+
+    switch(state){
+      case forward:
+        Timer3.resume(); 
+        smerJizdy = 1;
+      break;
+      case backward:
+        Timer3.resume();
+        rychlostJizdy = -1;
+      break;
+    }
+
+  }
+  else{
+
+    switch(state){
+    }
+    
+  }
 }
