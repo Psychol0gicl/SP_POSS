@@ -53,7 +53,7 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
     }
 }
 
-void otacej_dokud_nenajdes_caru(byte position){ 
+void otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doleva, -1 - doprava
   // 1001 jsme na care
   // 1111 jsme mimo caru
   // 0000 krizovatka
@@ -66,7 +66,7 @@ void otacej_dokud_nenajdes_caru(byte position){
   if ( leva & !stred1 & !stred2 & prava ){
     pohyb(0,0);
   } else {
-    pohyb(-120, 120);
+    pohyb(-120*smer, 120*smer);
   }
 }
 
