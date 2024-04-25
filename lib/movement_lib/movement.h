@@ -12,6 +12,7 @@ extern int rychlostJizdy;
 extern int minRychlost;
 extern int maxRychlost;
 
+extern MeGyro gyro;
 
 void levyMotorVpred(int rychlost);
 void levyMotorVzad(int rychlost);
@@ -20,5 +21,6 @@ void pravyMotorVpred(int rychlost);
 void pravyMotorVzad(int rychlost);
 void pravyMotorStop();
 void pohyb(int rychlostL, int rychlostR);
-void otacej_dokud_nenajdes_caru(byte position, int8_t smer);
+bool otacej_dokud_nenajdes_caru(byte position, int8_t smer);
 void otacej_dle_offsetu(int offset);
+void turn(int angle, int8_t smer);

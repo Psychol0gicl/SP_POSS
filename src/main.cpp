@@ -252,7 +252,6 @@ void setup() {
   //pohyb(100, 100);
 
   std::stack<char> krizovatky;
-  
 }
 
 
@@ -312,6 +311,7 @@ int offset = 0;
 
 byte state = forward;
 bool mapping = true;
+bool returning = false;
 
 void loop() {
   // sejmutí dat z detektoru cary
@@ -329,26 +329,31 @@ void loop() {
   if(mapping){// mapovaci rezim
 
     switch(state){
+
       case forward:
         Timer3.resume(); 
         smerJizdy = 1;
       break;
+
       case backward:
         Timer3.resume();
-        rychlostJizdy = -1;
+        smerJizdy = -1;
       break;
+
       case crossroads:
         Timer3.stop();
       break;
+
       case turnRight:
         Timer3.stop();
-        otacej_dokud_nenajdes_caru(position, -1);
-        state = forward;
+        if(returning){turn(90,1); state = backward;}
+        else{ if( otacej_dokud_nenajdes_caru(position, 1) ){ state = forward; } }
       break;
+
       case turnLeft:
         Timer3.stop();
-        otacej_dokud_nenajdes_caru(position, 1);
-        state = forward;
+        if(returning){turn(90,-1); state = backward;}
+        else{ if( otacej_dokud_nenajdes_caru(position, -1) ){ state = forward; } }
       break;
     }
 

@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "movement.h"
-
+#include "MeAuriga.h"
 
 
 void levyMotorVpred(int rychlost) {
@@ -53,7 +53,7 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
     }
 }
 
-void otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doleva, -1 - doprava
+bool otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doprava, -1 - doleva
   // 1001 jsme na care
   // 1111 jsme mimo caru
   // 0000 krizovatka
@@ -64,9 +64,9 @@ void otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doleva, -1 -
   boolean stred2 = (position & 0b00010);
   boolean prava = (position & 0b00001);
   if ( leva & !stred1 & !stred2 & prava ){
-    pohyb(0,0);
+    pohyb(0,0); return true;
   } else {
-    pohyb(-120*smer, 120*smer);
+    pohyb(120*smer, -120*smer); return false;
   }
 }
 
@@ -77,4 +77,11 @@ void otacej_dle_offsetu(int offset){
     pohyb(-120, 120);
   }
 
+}
+
+void turn(byte angle, int8_t smer){ // gyroskop umi max +- 179.9
+  gyro.begin();       // + znamena doprava
+  pohyb(120*smer, -120*smer);
+  while(abs(gyro.getAngleZ()) < angle){gyro.update();}
+  pohyb(0, 0);
 }
