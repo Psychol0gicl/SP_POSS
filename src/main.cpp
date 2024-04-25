@@ -292,6 +292,9 @@ int offset = 0;
 
 #define forward     0
 #define backward    1
+#define crossroads  2
+#define turnRight   3
+#define turnLeft    4
 
 byte state = forward;
 bool mapping = true;
@@ -319,6 +322,15 @@ void loop() {
       case backward:
         Timer3.resume();
         rychlostJizdy = -1;
+      break;
+      case crossroads:
+        Timer3.stop();
+      break;
+      case turnRight:
+        Timer3.stop();
+      break;
+      case turnLeft:
+        Timer3.stop();
       break;
     }
 
