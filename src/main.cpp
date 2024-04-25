@@ -44,7 +44,7 @@ const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
 int rychlostJizdy = 200;
-byte smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
+int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
 
@@ -328,9 +328,13 @@ void loop() {
       break;
       case turnRight:
         Timer3.stop();
+        otacej_dokud_nenajdes_caru(position, -1);
+        state = forward;
       break;
       case turnLeft:
         Timer3.stop();
+        otacej_dokud_nenajdes_caru(position, 1);
+        state = forward;
       break;
     }
 

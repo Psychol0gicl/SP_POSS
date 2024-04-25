@@ -20,5 +20,5 @@ void pravyMotorVpred(int rychlost);
 void pravyMotorVzad(int rychlost);
 void pravyMotorStop();
 void pohyb(int rychlostL, int rychlostR);
-void otacej_dokud_nenajdes_caru(byte position);
+void otacej_dokud_nenajdes_caru(byte position, int8_t smer);
 void otacej_dle_offsetu(int offset);

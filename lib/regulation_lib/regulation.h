@@ -24,7 +24,7 @@ extern volatile float Kp;
 
 extern volatile float uk; // vystup
 extern volatile int rozdilPasu; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
-extern byte smerJizdy;
+extern int8_t smerJizdy;
 
 void calc_pid(); // bude se pocitat pri timer interruptu
 
