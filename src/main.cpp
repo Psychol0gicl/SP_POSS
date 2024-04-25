@@ -2,10 +2,13 @@
 #include "MeAuriga.h"
 #include "MeRGBLineFollower.h"
 #include "TimerThree.h"
+#include "ArduinoSTL.h"
+#include <stack>
 
 #include "movement.h"
 #include "encoder.h"
 #include "regulation.h"
+#include "krizovatky.h"
 
 // mame robota cislo 11
 
@@ -45,6 +48,15 @@ const int inMotorLevy2 = 46;
 int rychlostJizdy = 200;
 int minRychlost = 100;
 int maxRychlost = 255;
+
+// typy krizovatek: + (kriz), T (tecko), 3 (tecko doleva), E (tecko doprava),
+//  > (doprava - tam kam sipka ukazuje), < (doleva - tam kam sipka ukazuje) 
+#define kriz '+';
+#define tecko 'T';
+#define rovne_a_doleva  '3';
+#define rovne_a_doprava 'E';
+#define zatacka_L '<';
+#define zatacka_P '>';
 
 // Ultrazvukovy snimac
 // pouziti: vzdalenost = sonar.distanceCm()
@@ -236,6 +248,8 @@ void setup() {
   Timer3.start(); 
   // pohyb(100, 100);
 
+  std::stack<char> krizovatky;
+  
 }
 
 
