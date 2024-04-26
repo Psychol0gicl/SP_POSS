@@ -242,6 +242,7 @@ void setup() {
 
   // inicializace casovace pro regulator
   Timer3.initialize(int(Ts*1000000));
+  Timer3.stop();
   Timer3.attachInterrupt(calc_pid); 
   
 
@@ -321,9 +322,9 @@ void loop() {
   
   position = RGBLineFollower.getPositionState();
   offset = RGBLineFollower.getPositionOffset();
-
+  yk = position;
   svit(position);
   // otacej_dokud_nenajdes_caru(position);
-  
+  Timer3.start();
  
 }
