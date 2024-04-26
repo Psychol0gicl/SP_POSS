@@ -1,4 +1,4 @@
-#include "MeAuriga.h"
+// #include "MeAuriga.h"
 
 // Levý motor
 extern const int pwmMotorPravy;

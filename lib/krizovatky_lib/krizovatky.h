@@ -11,4 +11,4 @@
 extern MeRGBLineFollower RGBLineFollower;
 char detece_krizovatky(byte position);
 byte detekce_zmeny(byte position);
-byte detekce_zmeny_od_previous(byte previous, byte current);
+boolean detekce_zmeny_od_position(byte position, byte current);

@@ -1,8 +1,7 @@
 // typy krizovatek: + (kriz), T (tecko), 3 (tecko doleva), E (tecko doprava), > (doprava - tam kam sipka ukazuje), < (doleva - tam kam sipka ukazuje) 
 #include "Arduino.h"
 #include "krizovatky.h"
-#include "MeRGBLineFollower.h"
-#include "MeAuriga.h"
+// #include "MeRGBLineFollower.h"
 
 
 char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = co bylo mimo krizovatku
@@ -66,11 +65,11 @@ byte detekce_zmeny(byte position){
         
 }
 
-byte detekce_zmeny_od_previous(byte previous, byte current){
-    if(previous == current){
-        return -1;
+boolean detekce_zmeny_od_position(byte position, byte current){
+    if(position == current){
+        return false;
     } else{
-        return current;
+        return true;
     }
 }
     

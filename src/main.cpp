@@ -212,6 +212,8 @@ void setup() {
   //pohyb(100, 100);
 
   std::stack<char> krizovatky;
+  current = -1;
+  previous = -1;
 }
 
 
@@ -282,6 +284,13 @@ void loop() {
   position = RGBLineFollower.getPositionState();
   offset = RGBLineFollower.getPositionOffset();
 
+  if(detekce_zmeny_od_position){
+    previous = current;
+    current = position;
+  }
+
+
+
   svit(position);
   // otacej_dokud_nenajdes_caru(position);
   otacej_dle_offsetu(offset);
@@ -323,7 +332,8 @@ void loop() {
           }
         else{
            if( otacej_dokud_nenajdes_caru(position, -1) ){
-             state = forward; }
+             state = forward; 
+             }
             }
       break;
     }
