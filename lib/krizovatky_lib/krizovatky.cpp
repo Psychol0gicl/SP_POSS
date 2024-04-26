@@ -20,7 +20,7 @@ char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = 
     if (on == off ){ // jsme stele stejne
         return -1; // nevim co jsem dat za char tak tam je zatim -1
     } 
-    if(!on_leva & !on_stred1 & !on_stred2 & !on_prava){ // vidim jen cernou
+    if(!on_leva & !on_stred1 & !on_stred2 & !on_prava){ // vidim jen cernou 0000
         if (off_leva & !off_stred1 & !off_stred2 & off_prava){ // vidim caru
             return kriz;
         }
@@ -28,8 +28,26 @@ char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = 
         {
             return tecko;
         }
-    }
-    //TODO: ostatni kombinace
+    } else if(!on_leva & !on_stred1 & !on_stred2 & on_prava ) { // zatacka doleva 0001
+        if (off_leva & !off_stred1 & !off_stred2 & off_prava){ // vidim caru
+            return rovne_a_doleva;
+        }
+        else if (off_leva & off_stred1 & off_stred2 & off_prava) //vidim bilo
+        {
+            return zatacka_L;
+        }    
+    } else if(on_leva & !on_stred1 & !on_stred2 & !on_prava ) { // zatacka doprava 1000
+        if (off_leva & !off_stred1 & !off_stred2 & off_prava){ // vidim caru
+            return rovne_a_doprava;
+        }
+        else if (off_leva & off_stred1 & off_stred2 & off_prava) //vidim bilo
+        {
+            return zatacka_P;
+        }
+
+
+    // Reseni identifikace krizovatek: budu si pamatovat dva posledni ruzny stavy
+    // a z tech to vzdy jednoznacne urcim
 }
 
  
