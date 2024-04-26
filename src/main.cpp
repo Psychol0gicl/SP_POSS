@@ -46,7 +46,7 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 200;
+int rychlostJizdy = 120;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -244,7 +244,8 @@ void setup() {
   Timer3.initialize(int(Ts*1000000));
   Timer3.stop();
   Timer3.attachInterrupt(calc_pid); 
-  
+  Timer3.stop();
+  pohyb(0, 0);
 
   while (digitalRead(levyNaraznik)) {
     // nepokracuj dokud neni stiknut levy naraznik
@@ -318,13 +319,13 @@ void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
 
-  delay(10);
+  delay(5);
   
   position = RGBLineFollower.getPositionState();
   offset = RGBLineFollower.getPositionOffset();
-  yk = position;
+  yk = offset;
   svit(position);
   // otacej_dokud_nenajdes_caru(position);
   Timer3.start();
- 
+  //Serial.println(rozdilPasu);
 }

@@ -6,7 +6,7 @@
 void calc_pid(){    // bude se pocitat pri timer interruptu
   cli(); // zakaz zpracovani dalsich preruseni
   //Reg. odchylka
-  yk = RGBLineFollower.getPositionOffset(); // <-512, 512>, nevim, jestli minus znamena vychylku doleva
+  //yk = RGBLineFollower.getPositionOffset(); // <-512, 512>, nevim, jestli minus znamena vychylku doleva
   ek = wk - yk;
   //ekm1 = wkm1 - ykm1;   netreba znova pocitat, jsou to minule hodnoty
     
@@ -18,6 +18,6 @@ void calc_pid(){    // bude se pocitat pri timer interruptu
   uk = yp+yi+yd; //celkovy aktualni akcni zasah - vystup regulatoru
   ekm1 = ek;
   rozdilPasu = (int)(uk/2.0);
-  pohyb(rychlostJizdy - smerJizdy*rozdilPasu, rychlostJizdy + smerJizdy*rozdilPasu);
+  pohyb(smerJizdy*rychlostJizdy - smerJizdy*rozdilPasu, smerJizdy*rychlostJizdy + smerJizdy*rozdilPasu);
   sei(); // opet povol zpracovani dalsich preruseni
 }
