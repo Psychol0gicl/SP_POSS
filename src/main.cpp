@@ -326,42 +326,5 @@ void loop() {
   // otacej_dokud_nenajdes_caru(position);
   otacej_dle_offsetu(offset);
   
-  if(mapping){// mapovaci rezim
-
-    switch(state){
-
-      case forward:
-        Timer3.resume(); 
-        smerJizdy = 1;
-      break;
-
-      case backward:
-        Timer3.resume();
-        smerJizdy = -1;
-      break;
-
-      case crossroads:
-        Timer3.stop();
-      break;
-
-      case turnRight:
-        Timer3.stop();
-        if(returning){turn(90,1); state = backward;}
-        else{ if( otacej_dokud_nenajdes_caru(position, 1) ){ state = forward; } }
-      break;
-
-      case turnLeft:
-        Timer3.stop();
-        if(returning){turn(90,-1); state = backward;}
-        else{ if( otacej_dokud_nenajdes_caru(position, -1) ){ state = forward; } }
-      break;
-    }
-
-  }
-  else{
-
-    switch(state){
-    }
-    
-  }
+ 
 }
