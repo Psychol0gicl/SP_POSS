@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "krizovatky.h"
 #include "MeRGBLineFollower.h"
-
+#include "MeAuriga.h"
 
 
 char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = co bylo mimo krizovatku
@@ -45,7 +45,7 @@ char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = 
             return zatacka_P;
         }
 
-
+    }
     // Reseni identifikace krizovatek: budu si pamatovat dva posledni ruzny stavy
     // a z tech to vzdy jednoznacne urcim
 }
