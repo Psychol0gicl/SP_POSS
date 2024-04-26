@@ -2,7 +2,7 @@
 #include "Arduino.h"
 #include "krizovatky.h"
 #include "MeRGBLineFollower.h"
-#include "MeAuriga.h"
+//#include "MeAuriga.h"
 
 
 char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = co bylo mimo krizovatku

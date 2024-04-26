@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "movement.h"
-#include "MeAuriga.h"
+//#include "MeAuriga.h"
 
 
 void levyMotorVpred(int rychlost) {
@@ -79,9 +79,11 @@ void otacej_dle_offsetu(int offset){
 
 }
 
+/*
 void turn(byte angle, int8_t smer){ // gyroskop umi max +- 179.9
   gyro.begin();       // + znamena doprava
   pohyb(120*smer, -120*smer);
   while(abs(gyro.getAngleZ()) < angle){gyro.update();}
   pohyb(0, 0);
 }
+*/
