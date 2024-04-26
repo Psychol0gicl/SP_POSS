@@ -316,7 +316,7 @@ void loop() {
       case turnRight:
         Timer3.stop();
         if(returning){
-          turn(90,1); state = backward;
+          //turn(90,1); state = backward;
           }
         else{ 
           if( otacej_dokud_nenajdes_caru(position, 1) ){
@@ -328,7 +328,7 @@ void loop() {
       case turnLeft:
         Timer3.stop();
         if(returning){
-          turn(90,-1); state = backward;
+          //turn(90,-1); state = backward;
           }
         else{
            if( otacej_dokud_nenajdes_caru(position, -1) ){

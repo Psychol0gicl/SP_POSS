@@ -1,4 +1,4 @@
-// #include "MeAuriga.h"
+//#include "MeAuriga.h"
 
 // Levý motor
 extern const int pwmMotorPravy;
@@ -14,7 +14,7 @@ extern int rychlostJizdy;
 extern int minRychlost;
 extern int maxRychlost;
 
-extern MeGyro gyro;
+//extern MeGyro gyro;
 
 void levyMotorVpred(int rychlost);
 void levyMotorVzad(int rychlost);
@@ -25,4 +25,4 @@ void pravyMotorStop();
 void pohyb(int rychlostL, int rychlostR);
 bool otacej_dokud_nenajdes_caru(byte position, int8_t smer);
 void otacej_dle_offsetu(int offset);
-void turn(int angle, int8_t smer);
+//void turn(int angle, int8_t smer);
