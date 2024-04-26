@@ -1,3 +1,5 @@
+#include "MeAuriga.h"
+
 // Levý motor
 extern const int pwmMotorPravy;
 extern const int inMotorPravy1;
