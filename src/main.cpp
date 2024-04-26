@@ -143,6 +143,8 @@ volatile bool oldStateAL = false;
 
 byte current;
 byte previous;
+std::stack<char> krizovatky;
+
 
 void setup() {
   // nastav piny narazniku
@@ -211,7 +213,6 @@ void setup() {
   //Timer3.start(); 
   //pohyb(100, 100);
 
-  std::stack<char> krizovatky;
   current = -1;
   previous = -1;
 }
@@ -284,9 +285,11 @@ void loop() {
   position = RGBLineFollower.getPositionState();
   offset = RGBLineFollower.getPositionOffset();
 
-  if(detekce_zmeny_od_position){
+  if(detekce_zmeny_od_position(position, current)){
     previous = current;
     current = position;
+    char krizovatka = detekce_krizovatky(previous, current);
+    krizovatky.push(krizovatka);
   }
 
 

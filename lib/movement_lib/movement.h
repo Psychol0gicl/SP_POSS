@@ -1,4 +1,6 @@
-//#include "MeAuriga.h"
+#include "Arduino.h"
+
+//#include "MeAuriga.h" //TODO: FIX
 
 // Levý motor
 extern const int pwmMotorPravy;

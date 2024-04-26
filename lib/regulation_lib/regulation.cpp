@@ -1,7 +1,6 @@
 #include "Arduino.h"
+// #include "MeRGBLineFollower.h" - uz importovano v headeru
 #include "regulation.h"
-#include "MeRGBLineFollower.h"
-#include "movement.h"
 
 void calc_pid(){    // bude se pocitat pri timer interruptu
   cli(); // zakaz zpracovani dalsich preruseni

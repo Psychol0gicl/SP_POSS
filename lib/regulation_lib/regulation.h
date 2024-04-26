@@ -1,5 +1,6 @@
-
+#include "Arduino.h"
 #include "MeRGBLineFollower.h"
+#include "movement.h"
 extern MeRGBLineFollower RGBLineFollower;
 
 //Fyzikalni parametry PID na interni diskretni zesileni - bude vypocteno jen jednou pri inicializaci

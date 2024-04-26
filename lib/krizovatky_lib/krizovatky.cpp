@@ -1,7 +1,7 @@
 // typy krizovatek: + (kriz), T (tecko), 3 (tecko doleva), E (tecko doprava), > (doprava - tam kam sipka ukazuje), < (doleva - tam kam sipka ukazuje) 
 #include "Arduino.h"
 #include "krizovatky.h"
-#include "MeRGBLineFollower.h"
+// #include "MeRGBLineFollower.h" - uz importnuto v headeru
 //#include "MeAuriga.h"
 
 
@@ -18,7 +18,7 @@ char detekce_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = 
 
 
     if (on == off ){ // jsme stele stejne
-        return -1; // nevim co jsem dat za char tak tam je zatim -1
+        return 'x'; // nevim co jsem dat za char tak tam je zatim -1
     } 
     if(!on_leva & !on_stred1 & !on_stred2 & !on_prava){ // vidim jen cernou 0000
         if (off_leva & !off_stred1 & !off_stred2 & off_prava){ // vidim caru
