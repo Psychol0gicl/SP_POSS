@@ -324,7 +324,6 @@ void loop() {
 
   svit(position);
   // otacej_dokud_nenajdes_caru(position);
-  otacej_dle_offsetu(offset);
   
  
 }
