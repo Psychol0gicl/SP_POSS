@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "encoder.h"
 
 // enkoder pro pravy motor

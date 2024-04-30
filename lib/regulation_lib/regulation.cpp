@@ -1,4 +1,3 @@
-#include "Arduino.h"
 // #include "MeRGBLineFollower.h" - uz importovano v headeru
 #include "regulation.h"
 
