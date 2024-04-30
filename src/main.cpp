@@ -284,6 +284,7 @@ void loop() {
   
   position = RGBLineFollower.getPositionState();
   offset = RGBLineFollower.getPositionOffset();
+  yk = offset;
 
   if(detekce_zmeny_od_position(position, current)){
     previous = current;
