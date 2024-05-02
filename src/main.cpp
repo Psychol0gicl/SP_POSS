@@ -53,12 +53,13 @@ int maxRychlost = 255;
 
 // typy krizovatek: + (kriz), T (tecko), 3 (tecko doleva), E (tecko doprava),
 //  > (doprava - tam kam sipka ukazuje), < (doleva - tam kam sipka ukazuje) 
-#define kriz '+';
-#define tecko 'T';
-#define rovne_a_doleva  '3';
-#define rovne_a_doprava 'E';
-#define zatacka_L '<';
-#define zatacka_P '>';
+#define kriz '+'
+#define tecko 'T'
+#define rovne_a_doleva  '3'
+#define rovne_a_doprava 'E' // define bez stredniku
+#define zatacka_L '<'
+#define zatacka_P '>'
+#define rovne '|'
 
 // Ultrazvukovy snimac
 // pouziti: vzdalenost = sonar.distanceCm()
@@ -141,8 +142,8 @@ volatile bool stateAL = false;
 volatile bool stateBL = false;
 volatile bool oldStateAL = false;
 
-byte current;
-byte previous;
+byte current = -1;
+byte previous = -1;
 std::stack<char> krizovatky;
 
 
@@ -174,8 +175,8 @@ void setup() {
   pinMode(levyEnkoderB,INPUT_PULLUP);
 
   // inicializace obsluhy preruseni od kanalů A enkoderů
-  attachInterrupt(digitalPinToInterrupt(pravyEnkoderA),&pravyEncoderAInt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(levyEnkoderA),&levyEncoderAInt, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(pravyEnkoderA),&pravyEncoderAInt, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(levyEnkoderA),&levyEncoderAInt, CHANGE);
 
   // pripoj a omez servo
   servo.attach(servoPin);//,servoMin,servoMax);
@@ -212,9 +213,6 @@ void setup() {
   }
   //Timer3.start(); 
   //pohyb(100, 100);
-
-  current = -1;
-  previous = -1;
 }
 
 
@@ -286,15 +284,6 @@ void loop() {
   offset = RGBLineFollower.getPositionOffset();
   yk = offset;
 
-  if(detekce_zmeny_od_position(position, current)){
-    previous = current;
-    current = position;
-    char krizovatka = detekce_krizovatky(previous, current);
-    krizovatky.push(krizovatka);
-  }
-
-
-
   svit(position);
     if(abs(rozdilPasu) >= 20){LED(9, yellow);}
   else{LED(9, black);}
@@ -306,42 +295,105 @@ void loop() {
 
     switch(state){
 
-      case forward:
+      case forward: //=============================================================================
         Timer3.resume(); 
         smerJizdy = 1;
+
+        if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+          Timer3.stop();
+          pohyb(120,120);
+          current = position;
+          state = crossroads;
+        }
+        else if(position == 0b00001111){ // slepa
+          Timer3.stop();
+          pohyb(0,0);
+          returning = true;
+          state = turnRight;
+        }
       break;
 
-      case backward:
+      case backward:  //=============================================================================
         Timer3.resume();
         smerJizdy = -1;
       break;
 
-      case crossroads:
-        Timer3.stop();
-      break;
+      case crossroads:  //=============================================================================
+        if(position == 0b00001011){break;}
+        if(position == 0b00001101){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
+        previous = current;
+        current = position;
+        if(detekce_zmeny_od_position(position, current)){
+          pohyb(0,0);
+          char krizovatka = detekce_krizovatky(previous, current);
 
-      case turnRight:
-        Timer3.stop();
-        if(returning){
-          //turn(90,1); state = backward;
-          }
-        else{ 
-          if( otacej_dokud_nenajdes_caru(position, 1) ){
-             state = forward; 
-             }
-           }
-      break;
+          if(returning){
 
-      case turnLeft:
-        Timer3.stop();
-        if(returning){
-          //turn(90,-1); state = backward;
-          }
-        else{
-           if( otacej_dokud_nenajdes_caru(position, -1) ){
-             state = forward; 
-             }
+            switch(krizovatka){
+              case zatacka_L: state = turnLeft; break;
+              case zatacka_P: state = turnRight; break;
+
+              default:
+                krizovatka = krizovatky.top();
+                krizovatky.pop();
+                switch(krizovatka){
+                  case zatacka_L: state = turnLeft; break;
+                  case zatacka_P: state = turnRight; break;
+
+                  case tecko:
+                    krizovatky.push(zatacka_L);
+                    returning = false;
+                    state = forward;
+                  break;
+
+                  case kriz:
+                    krizovatky.push(rovne_a_doleva);
+                    returning = false;
+                    state = turnRight;
+                  break;
+
+                  case rovne_a_doleva:
+                    krizovatky.push(zatacka_L);
+                    returning = false;
+                    state = turnRight;
+                  break;
+
+                  case rovne_a_doprava:
+                    krizovatky.push(rovne);
+                    returning = false;
+                    state = turnRight;
+                  break;
+                }
+              break;
             }
+    
+          }
+          else{
+            
+            switch(krizovatka){
+              case zatacka_L: state = turnLeft; break;
+              case zatacka_P: state = turnRight; break;
+
+              case rovne_a_doleva: 
+                krizovatky.push(krizovatka);
+                state = forward; 
+              break;
+
+              default:
+                krizovatky.push(krizovatka);
+                state = turnRight;
+            }
+
+          }
+        }
+      break;
+
+      case turnRight: //=============================================================================
+        if( otacej_dokud_nenajdes_caru(position, 1) ){state = forward; }
+      break;
+
+      case turnLeft: //=============================================================================
+        if( otacej_dokud_nenajdes_caru(position, -1) ){state = forward; }
       break;
     }
 
