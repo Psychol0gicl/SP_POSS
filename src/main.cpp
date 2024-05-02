@@ -114,8 +114,8 @@ MeRGBLed ledRing(0, numberOfLEDs );
 #define green      000,255,000
 #define chartreuse 127,255,000
 #define yellow     255,255,000
-#define white      000,000,000
-#define black      255,255,255
+#define black      000,000,000
+#define white      255,255,255
 
 void LED(byte num, int R, int G, int B){
   ledRing.setColor(num, R,G,B);
@@ -325,7 +325,11 @@ void loop() {
   offset = RGBLineFollower.getPositionOffset();
   yk = offset;
   svit(position);
+
+  if(abs(rozdilPasu) >= 20){LED(9, yellow);}
+  else{LED(9, black);}
+  
   // otacej_dokud_nenajdes_caru(position);
-  Timer3.start();
+  Timer3.resume();
   //Serial.println(rozdilPasu);
 }
