@@ -1,8 +1,40 @@
 #include <Arduino.h>
 #include "MeAuriga.h"
 #include "MeRGBLineFollower.h"
+#include "TimerThree.h"
+#include "ArduinoSTL.h"
+#include <stack>
+
+#include "movement.h"
+#include "encoder.h"
+#include "regulation.h"
+#include "krizovatky.h"
 
 // mame robota cislo 11
+
+// Parametry spojiteho PID regulatoru - paralelni forma s filtrovanou D slozkou, pro rychlost 120
+volatile float Kp = 0.3;
+float Ki = 1;
+float Kd = 0;   // D slozka je vypnuta
+float Tf = 0; 
+float Ts = 0.01; // perioda vzorkovani pro vypocet param regulatoru
+
+//Fyzikalni parametry PID na interni diskretni zesileni
+volatile const float ci=Ki*Ts/2; 
+volatile const float cd1=-(Ts-2*Tf)/(Ts+2*Tf); 
+volatile const float cd2=2*Kd/(Ts+2*Tf);
+
+volatile float wk = 0;    // pozad hodnota
+volatile float yk = 0;    // hodnota ze zpetne vazby - pravdepodobne offset z cidla
+volatile float ek = 0;    // reg odchylka
+volatile float ekm1 = 0;  // minula hodnota reg odchylky
+
+//globalni promenne pro interni stav integratoru a derivatoru
+volatile float yi = 0; 
+volatile float yd = 0;
+volatile float yp = 0;
+volatile float uk = 0; // vystup regulatoru
+volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
 
 // Levý motor
 const int pwmMotorPravy = 11;
@@ -14,9 +46,19 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 200;
+int rychlostJizdy = 120;
+int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
+
+// typy krizovatek: + (kriz), T (tecko), 3 (tecko doleva), E (tecko doprava),
+//  > (doprava - tam kam sipka ukazuje), < (doleva - tam kam sipka ukazuje) 
+#define kriz '+';
+#define tecko 'T';
+#define rovne_a_doleva  '3';
+#define rovne_a_doprava 'E';
+#define zatacka_L '<';
+#define zatacka_P '>';
 
 // Ultrazvukovy snimac
 // pouziti: vzdalenost = sonar.distanceCm()
@@ -72,8 +114,8 @@ MeRGBLed ledRing(0, numberOfLEDs );
 #define green      000,255,000
 #define chartreuse 127,255,000
 #define yellow     255,255,000
-#define white      000,000,000
-#define black      255,255,255
+#define black      000,000,000
+#define white      255,255,255
 
 void LED(byte num, int R, int G, int B){
   ledRing.setColor(num, R,G,B);
@@ -88,45 +130,59 @@ MeBuzzer buzzer;
 // Gyro
 MeGyro gyro(1,0x69);
 
-// osetreni preruseni od kanalu A enkoderu na pravem motoru
-void pravyEncoderAInt() {
-}
+// pro enkodery
+volatile bool encMSG = false;
+volatile int pulseCountR = 0;
+volatile bool stateAR = false;
+volatile bool stateBR = false;
+volatile bool oldStateAR = false;
+volatile int pulseCountL = 0;
+volatile bool stateAL = false;
+volatile bool stateBL = false;
+volatile bool oldStateAL = false;
 
-// osetreni preruseni od kanalu A enkoderu na levem motoru
-void levyEncoderAInt() {
-}
+/*
+int offset = 0;
 
-void levyMotorVpred(int rychlost) {
-  digitalWrite(inMotorLevy1, HIGH);
-  digitalWrite(inMotorLevy2, LOW);
-  analogWrite(pwmMotorLevy, rychlost);
-}
+float ci = 0;
+float cd1 = 0;
+float cd2 = 0;
 
-void levyMotorVzad(int rychlost) {
-  digitalWrite(inMotorLevy1, LOW);
-  digitalWrite(inMotorLevy2, HIGH);
-  analogWrite(pwmMotorLevy, rychlost);
-}
+float wk = 0;
+float wkm1 = 0;
+float yk = 0;
+float ykm1 = 0;
+float ek = 0;
+float ekm1 = 0;
 
-void levyMotorStop() {
-  analogWrite(pwmMotorLevy, 0);
-}
+//globalni promenne pro interni stav integratoru a derivatoru
+float yi = 0; 
+float yd = 0;
 
-void pravyMotorVpred(int rychlost) {
-  digitalWrite(inMotorPravy1, LOW);
-  digitalWrite(inMotorPravy2, HIGH);
-  analogWrite(pwmMotorPravy, rychlost);
-}
+// Parametry spojiteho PID regulatoru - paralelni forma s filtrovanou D slozkou
+float Kp = 33;
+float Ki = 38;
+float Kd = 6.6;
+float Tf = 0.04;
 
-void pravyMotorVzad(int rychlost) {
-  digitalWrite(inMotorPravy1, HIGH);
-  digitalWrite(inMotorPravy2, LOW);
-  analogWrite(pwmMotorPravy, rychlost);
-}
+float calc_pid(float wk, float wkm1, float yk, float ykm1){
+  //Fyzikalni parametry PID na interni diskretni zesileni
+  ci=Ki*Ts/2; 
+  cd1=-(Ts-2*Tf)/(Ts+2*Tf); 
+  cd2=2*Kd/(Ts+2*Tf);
+    
+  //Reg. odchylka
+  ek = wk - yk;
+  ekm1 = wkm1 - ykm1;
+    
+  //Akcni zasah po slozkach
+  yi = yi + ci*(ek+ekm1);
+  yd = cd1*yd + cd2*(ek-ekm1);
+  yp = Kp*ek;
 
-void pravyMotorStop() {
-  analogWrite(pwmMotorPravy, 0);
+  return(yp+yi+yd); //celkovy aktualni akcni zasah - vystup regulatoru
 }
+*/
 
 void setup() {
   // nastav piny narazniku
@@ -184,30 +240,51 @@ void setup() {
   // inicializace sériového kanálu
   Serial.begin(9600);
 
+  // inicializace casovace pro regulator
+  Timer3.initialize(int(Ts*1000000));
+  Timer3.stop();
+  Timer3.attachInterrupt(calc_pid); 
+  Timer3.stop();
+  pohyb(0, 0);
+
   while (digitalRead(levyNaraznik)) {
     // nepokracuj dokud neni stiknut levy naraznik
   }
+  //Timer3.start(); 
+  //pohyb(100, 100);
 
+  std::stack<char> krizovatky;
 }
 
-void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
-                                          // doprava - pravy opacny
 
-  if(rychlostL < 0){
-    levyMotorVzad(abs(rychlostL));
-    }
-  else{
-    levyMotorVpred(rychlostL);
-    }
+void svit(byte position){
+  if(0b00001000 & position){
+      LED(5, red);
+      }
+    else{
+      LED(5, blue);
+      }
 
-  if(rychlostR < 0){
-    pravyMotorVzad(abs(rychlostR));
-    }
-  else{
-    pravyMotorVpred(rychlostR);
+    if(0b00000100 & position){
+      LED(4, red);
+      }
+    else{
+      LED(4, blue);
+      }
+
+    if(0b00000010 & position){
+      LED(2, red);
+      }
+    else{
+      LED(2, blue);
+      }
+    if(0b00000001 & position){
+      LED(1, red);
+      }
+    else{
+      LED(1, blue);
     }
 }
-
   /*
   LED(1, amber*0.5); // 300
   LED(2, orange*0.5); // 330
@@ -223,23 +300,36 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
   LED(12, yellow*0.5);    // 270
   */
 
-  byte position = 0;
-  float jas = 0.05;
+byte position = 0;
+float jas =  0;
+int offset = 0;
+
+
+#define forward     0
+#define backward    1
+#define crossroads  2
+#define turnRight   3
+#define turnLeft    4
+
+byte state = forward;
+bool mapping = true;
+bool returning = false;
 
 void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
 
-  delay(10);
+  delay(5);
   
   position = RGBLineFollower.getPositionState();
-  if(0b00001000 & position){LED(5, red*0.05);}
-  else{LED(5, blue*0.05);}
-  if(0b00000100 & position){LED(4, red*0.05);}
-  else{LED(4, blue*0.05);}
-  if(0b00000010 & position){LED(2, red*0.05);}
-  else{LED(2, blue*0.05);}
-  if(0b00000001 & position){LED(1, red*0.05);}
-  else{LED(1, blue*0.05);}
+  offset = RGBLineFollower.getPositionOffset();
+  yk = offset;
+  svit(position);
+
+  if(abs(rozdilPasu) >= 20){LED(9, yellow);}
+  else{LED(9, black);}
   
+  // otacej_dokud_nenajdes_caru(position);
+  Timer3.resume();
+  //Serial.println(rozdilPasu);
 }
