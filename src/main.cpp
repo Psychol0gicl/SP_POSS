@@ -46,7 +46,7 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 80;
+int rychlostJizdy = 100;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -176,6 +176,21 @@ void svit(byte position){
     }
 }
 
+/*
+  LED(1, amber*0.5); // 300
+  LED(2, orange*0.5); // 330
+  LED(3, vermillion*0.5); // 0
+  LED(4, red*0.5);  // 30
+  LED(5, magenta*0.5); // 60
+  LED(6, purple*0.5); // 90
+  LED(7, indigo*0.5); // 120
+  LED(8, blue*0.5);   // 150
+  LED(9, aquamarine*0.5); // 180
+  LED(10, green*0.5);     // 210
+  LED(11, chartreuse*0.5);// 240
+  LED(12, yellow*0.5);    // 270
+  */
+
 void setup() {
   // nastav piny narazniku
   pinMode(pravyNaraznik,INPUT_PULLUP);
@@ -232,9 +247,6 @@ void setup() {
   // inicializace sériového kanálu
   Serial.begin(9600);
 
-  
-  
-
   while (digitalRead(levyNaraznik)) {
     RGBLineFollower.loop();
     svit(RGBLineFollower.getPositionState());
@@ -246,22 +258,6 @@ void setup() {
   Timer3.attachInterrupt(calc_pid); 
 }
 
-
-
-  /*
-  LED(1, amber*0.5); // 300
-  LED(2, orange*0.5); // 330
-  LED(3, vermillion*0.5); // 0
-  LED(4, red*0.5);  // 30
-  LED(5, magenta*0.5); // 60
-  LED(6, purple*0.5); // 90
-  LED(7, indigo*0.5); // 120
-  LED(8, blue*0.5);   // 150
-  LED(9, aquamarine*0.5); // 180
-  LED(10, green*0.5);     // 210
-  LED(11, chartreuse*0.5);// 240
-  LED(12, yellow*0.5);    // 270
-  */
 
 byte position = 0;
 float jas =  0;
@@ -287,10 +283,18 @@ void loop() {
   delay(5);
   
   position = RGBLineFollower.getPositionState();
-  offset = RGBLineFollower.getPositionOffset();
-  yk = offset;
 
   svit(position);
+  if(returning){LED(8, red); LED(10,red);}
+  else{LED(8, black); LED(10,black);}
+
+  switch(position){// necessary evil
+    case 0b1000: position = 0b0001; break; 
+    case 0b0001: position = 0b1000; break; 
+  }
+
+  offset = RGBLineFollower.getPositionOffset();
+  yk = offset;
 
   if(abs(rozdilPasu) >= 20){LED(9, yellow);}
   else {LED(9, black);}
@@ -351,11 +355,13 @@ void loop() {
         previous = current;
         current = position;
 
-
-        if(detekce_zmeny_od_position(position, current)){
+        // Serial.print(previous, BIN);
+        // Serial.print("   ");
+        // Serial.println(current, BIN);
+        if(detekce_zmeny_od_position(previous, current)){
           pohyb(0,0);
           char krizovatka = detekce_krizovatky(previous, current);
-
+          Serial.println(krizovatka);
           if(returning){
 
             switch(krizovatka){

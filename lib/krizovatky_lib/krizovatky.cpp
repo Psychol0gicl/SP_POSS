@@ -64,11 +64,5 @@ byte detekce_zmeny(byte position){
         
 }
 
-boolean detekce_zmeny_od_position(byte position, byte current){
-    if(position == current){
-        return false;
-    } else{
-        return true;
-    }
-}
+boolean detekce_zmeny_od_position(byte position, byte current){return( !(position == current) );}
     
