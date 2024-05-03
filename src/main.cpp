@@ -327,7 +327,7 @@ void loop() {
       break;
 
       case crossroads:  //=============================================================================
-        if(millis() - start > 500){ // cil nalezen
+        if(millis() - start > 2000){ // cil nalezen
           pohyb(-150, 150);
           for (int i =1; i<=12;i++){
             LED(i, blue); 
