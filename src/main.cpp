@@ -147,6 +147,35 @@ byte previous = -1;
 std::stack<char> krizovatky;
 
 
+void svit(byte position){
+  if(0b00001000 & position){
+      LED(5, red);
+      }
+    else{
+      LED(5, blue);
+      }
+
+    if(0b00000100 & position){
+      LED(4, red);
+      }
+    else{
+      LED(4, blue);
+      }
+
+    if(0b00000010 & position){
+      LED(2, red);
+      }
+    else{
+      LED(2, blue);
+      }
+    if(0b00000001 & position){
+      LED(1, red);
+      }
+    else{
+      LED(1, blue);
+    }
+}
+
 void setup() {
   // nastav piny narazniku
   pinMode(pravyNaraznik,INPUT_PULLUP);
@@ -203,47 +232,22 @@ void setup() {
   // inicializace sériového kanálu
   Serial.begin(9600);
 
-  // inicializace casovace pro regulator
-  Timer3.initialize(int(Ts*1000000));
-  Timer3.attachInterrupt(calc_pid); 
+  
   
 
   while (digitalRead(levyNaraznik)) {
+    RGBLineFollower.loop();
+    svit(RGBLineFollower.getPositionState());
     // nepokracuj dokud neni stiknut levy naraznik
   }
-  //Timer3.start(); 
-  //pohyb(100, 100);
+
+  // inicializace casovace pro regulator
+  Timer3.initialize(int(Ts*1000000));
+  Timer3.attachInterrupt(calc_pid); 
 }
 
 
-void svit(byte position){
-  if(0b00001000 & position){
-      LED(5, red);
-      }
-    else{
-      LED(5, blue);
-      }
 
-    if(0b00000100 & position){
-      LED(4, red);
-      }
-    else{
-      LED(4, blue);
-      }
-
-    if(0b00000010 & position){
-      LED(2, red);
-      }
-    else{
-      LED(2, blue);
-      }
-    if(0b00000001 & position){
-      LED(1, red);
-      }
-    else{
-      LED(1, blue);
-    }
-}
   /*
   LED(1, amber*0.5); // 300
   LED(2, orange*0.5); // 330
