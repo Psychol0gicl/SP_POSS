@@ -291,8 +291,9 @@ void loop() {
   yk = offset;
 
   svit(position);
-    if(abs(rozdilPasu) >= 20){LED(9, yellow);}
-  else{LED(9, black);}
+
+  if(abs(rozdilPasu) >= 20){LED(9, yellow);}
+  else {LED(9, black);}
 
   // otacej_dokud_nenajdes_caru(position);
   // otacej_dle_offsetu(offset);
@@ -328,7 +329,17 @@ void loop() {
       case crossroads:  //=============================================================================
         if(millis() - start > 500){ // cil nalezen
           pohyb(-150, 150);
+          for (int i =1; i<=12;i++){
+            LED(i, blue); 
+          }
           delay(2000);
+          for (int i =1; i<=12;i++){
+            LED(i, red);  
+          }    
+          delay(2000);
+          for (int i =1; i<=12;i++){
+            LED(i, black);  
+          }  
           pohyb(0,0);
           mapping = false;
           state = forward;
