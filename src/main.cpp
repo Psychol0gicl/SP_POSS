@@ -274,6 +274,8 @@ byte state = forward;
 bool mapping = true;
 bool returning = false;
 
+long start = 0;
+
 void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
@@ -303,6 +305,7 @@ void loop() {
           Timer3.stop();
           pohyb(120,120);
           current = position;
+          start = millis();
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
@@ -319,10 +322,21 @@ void loop() {
       break;
 
       case crossroads:  //=============================================================================
+        if(millis() - start > 500){ // cil nalezen
+          pohyb(-150, 150);
+          delay(2000);
+          pohyb(0,0);
+          mapping = false;
+          state = forward;
+          while(digitalRead(pravyNaraznik)){}// nepokracuj dokud neni stiknut levy naraznik
+          break;
+        }
         if(position == 0b00001011){break;}
         if(position == 0b00001101){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
         previous = current;
         current = position;
+
+
         if(detekce_zmeny_od_position(position, current)){
           pohyb(0,0);
           char krizovatka = detekce_krizovatky(previous, current);
