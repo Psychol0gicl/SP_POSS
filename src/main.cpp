@@ -411,6 +411,7 @@ void loop() {
               default:
                 krizovatky.push(krizovatka);
                 state = turnRight;
+              break;
             }
 
           }
