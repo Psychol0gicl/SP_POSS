@@ -64,7 +64,7 @@ bool otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doprava, -1 
   if ( leva & !stred1 & !stred2 & prava ){
     pohyb(0,0); return true;
   } else {
-    pohyb(120*smer, -120*smer); return false;
+    pohyb(rychlostJizdy*smer, -rychlostJizdy*smer); return false;
   }
 }
 

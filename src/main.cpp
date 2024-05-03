@@ -46,7 +46,7 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 120;
+int rychlostJizdy = 80;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -307,7 +307,7 @@ void loop() {
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
           Timer3.stop();
-          pohyb(120,120);
+          pohyb(rychlostJizdy,rychlostJizdy);
           current = position;
           start = millis();
           state = crossroads;
