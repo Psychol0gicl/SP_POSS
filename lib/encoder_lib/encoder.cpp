@@ -43,3 +43,7 @@ void levyEncoderAInt() {
   encMSG = true;
   sei(); // opet povol zpracovani dalsich preruseni
 }
+
+double getDist(){
+  return( (pulseCountL+pulseCountR)/2.0 * 0.201 ); 
+}

@@ -25,3 +25,4 @@ extern volatile long pulseCountVpravo;
 
 void levyEncoderAInt();
 void pravyEncoderAInt();
+double getDist();

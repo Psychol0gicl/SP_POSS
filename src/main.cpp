@@ -46,7 +46,7 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 100;
+int rychlostJizdy = 140;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -219,8 +219,8 @@ void setup() {
   pinMode(levyEnkoderB,INPUT_PULLUP);
 
   // inicializace obsluhy preruseni od kanalů A enkoderů
-  //attachInterrupt(digitalPinToInterrupt(pravyEnkoderA),&pravyEncoderAInt, CHANGE);
-  //attachInterrupt(digitalPinToInterrupt(levyEnkoderA),&levyEncoderAInt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(pravyEnkoderA),&pravyEncoderAInt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(levyEnkoderA),&levyEncoderAInt, CHANGE);
 
   // pripoj a omez servo
   servo.attach(servoPin);//,servoMin,servoMax);
@@ -242,7 +242,7 @@ void setup() {
   
   // inicializace sledovani cary
   RGBLineFollower.begin();
-  RGBLineFollower.setKp(1);
+  RGBLineFollower.setKp(0.8);
 
   // inicializace sériového kanálu
   Serial.begin(9600);
@@ -254,8 +254,8 @@ void setup() {
   }
 
   // inicializace casovace pro regulator
-  Timer3.initialize(int(Ts*1000000));
-  Timer3.attachInterrupt(calc_pid); 
+  // Timer3.initialize(int(Ts*1000000));
+  // Timer3.attachInterrupt(calc_pid); 
 }
 
 
@@ -275,12 +275,13 @@ bool mapping = true;
 bool returning = false;
 
 long start = 0;
+bool started = false;
+bool crossEnter = false;
+int uMax = 50;
 
 void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
-
-  delay(5);
   
   position = RGBLineFollower.getPositionState();
 
@@ -307,18 +308,21 @@ void loop() {
     switch(state){
 
       case forward: //=============================================================================
-        Timer3.resume(); 
+        //Timer3.resume(); 
         smerJizdy = 1;
+        if(offset > uMax){offset = uMax;}
+        else if(offset < -uMax){offset = -uMax;}
+        pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
-          Timer3.stop();
+          //Timer3.stop();
+          crossEnter = true;
           pohyb(rychlostJizdy,rychlostJizdy);
-          current = position;
           start = millis();
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
-          Timer3.stop();
+          //Timer3.stop();
           pohyb(0,0);
           returning = true;
           state = turnRight;
@@ -326,12 +330,13 @@ void loop() {
       break;
 
       case backward:  //=============================================================================
-        Timer3.resume();
+        //Timer3.resume();
         smerJizdy = -1;
       break;
 
       case crossroads:  //=============================================================================
-        if(millis() - start > 2000){ // cil nalezen
+        if(crossEnter){current = position; crossEnter = false;}
+        if(millis() - start > 100 && previous == 0b00000000){ // cil nalezen
           pohyb(-150, 150);
           for (int i =1; i<=12;i++){
             LED(i, blue); 
@@ -347,7 +352,7 @@ void loop() {
           pohyb(0,0);
           mapping = false;
           state = forward;
-          while(digitalRead(pravyNaraznik)){}// nepokracuj dokud neni stiknut levy naraznik
+          while(digitalRead(pravyNaraznik)){}// cekani na pravy naraznik
           break;
         }
         if(position == 0b00001011){break;}
@@ -355,10 +360,12 @@ void loop() {
         previous = current;
         current = position;
 
-        // Serial.print(previous, BIN);
-        // Serial.print("   ");
-        // Serial.println(current, BIN);
+        Serial.print(previous, BIN);
+        Serial.print("   ");
+        Serial.println(current, BIN);
         if(detekce_zmeny_od_position(previous, current)){
+          pohyb(rychlostJizdy,rychlostJizdy);
+          delay(100); // puvodni hodnota 100
           pohyb(0,0);
           char krizovatka = detekce_krizovatky(previous, current);
           Serial.println(krizovatka);
@@ -372,8 +379,9 @@ void loop() {
                 krizovatka = krizovatky.top();
                 krizovatky.pop();
                 switch(krizovatka){
-                  case zatacka_L: state = turnLeft; break;
-                  case zatacka_P: state = turnRight; break;
+                  case zatacka_L: state = turnRight; break;
+                  case zatacka_P: state = turnLeft; break;
+                  case rovne: state = forward; break; 
 
                   case tecko:
                     krizovatky.push(zatacka_L);
@@ -425,11 +433,13 @@ void loop() {
       break;
 
       case turnRight: //=============================================================================
-        if( otacej_dokud_nenajdes_caru(position, 1) ){state = forward; }
+        if(!started){turn(85, 1); started = true;}
+        if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward;}
       break;
 
       case turnLeft: //=============================================================================
-        if( otacej_dokud_nenajdes_caru(position, -1) ){state = forward; }
+        if(!started){turn(85, -1); started = true;}
+        if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
       break;
     }
 
