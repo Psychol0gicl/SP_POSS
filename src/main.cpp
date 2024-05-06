@@ -277,6 +277,7 @@ bool returning = false;
 long start = 0;
 bool started = false;
 bool crossEnter = false;
+bool firstCross = true;
 int uMax = 50;
 
 void loop() {
@@ -364,6 +365,7 @@ void loop() {
         Serial.print("   ");
         Serial.println(current, BIN);
         if(detekce_zmeny_od_position(previous, current)){
+          if(firstCross){state = forward; firstCross = false; break;}
           pohyb(rychlostJizdy,rychlostJizdy);
           delay(100); // puvodni hodnota 100
           pohyb(0,0);
@@ -442,6 +444,14 @@ void loop() {
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
       break;
     }
+
+
+
+
+
+
+
+
 
   }
   else{
