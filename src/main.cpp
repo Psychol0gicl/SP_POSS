@@ -145,7 +145,7 @@ volatile bool oldStateAL = false;
 byte current = -1;
 byte previous = -1;
 std::stack<char> krizovatky;
-
+std::stack<char> temp;
 
 void svit(byte position){
   if(0b00001000 & position){
@@ -320,6 +320,7 @@ void loop() {
           crossEnter = true;
           pohyb(rychlostJizdy,rychlostJizdy);
           start = millis();
+          distReset();
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
@@ -336,7 +337,13 @@ void loop() {
       break;
 
       case crossroads:  //=============================================================================
-        if(crossEnter){current = position; crossEnter = false;}
+
+        if(crossEnter){
+          while(getDist() < 1.0){}
+          current = position; 
+          crossEnter = false;
+        }
+
         if(millis() - start > 100 && previous == 0b00000000){ // cil nalezen
           pohyb(-150, 150);
           for (int i =1; i<=12;i++){
@@ -353,6 +360,16 @@ void loop() {
           pohyb(0,0);
           mapping = false;
           state = forward;
+
+          while(!krizovatky.empty()){ // preskladani zasobniku
+            temp.push(krizovatky.top());
+            krizovatky.pop();
+          }
+          while(!temp.empty()){
+            krizovatky.push(krizovatky.top());
+            krizovatky.pop();
+          }
+
           while(digitalRead(pravyNaraznik)){}// cekani na pravy naraznik
           break;
         }
@@ -367,7 +384,7 @@ void loop() {
         if(detekce_zmeny_od_position(previous, current)){
           if(firstCross){state = forward; firstCross = false; break;}
           pohyb(rychlostJizdy,rychlostJizdy);
-          delay(100); // puvodni hodnota 100
+          while(getDist() < 15.0){}
           pohyb(0,0);
           char krizovatka = detekce_krizovatky(previous, current);
           Serial.println(krizovatka);

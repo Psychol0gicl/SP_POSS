@@ -45,5 +45,7 @@ void levyEncoderAInt() {
 }
 
 double getDist(){
-  return( (pulseCountL+pulseCountR)/2.0 * 0.201 ); 
+  return( (double)((pulseCountL+pulseCountR)/2.0 * 0.201) ); 
 }
+
+void distReset(){pulseCountL = 0; pulseCountR = 0;}
