@@ -145,7 +145,7 @@ volatile bool oldStateAL = false;
 byte current = -1;
 byte previous = -1;
 std::stack<char> krizovatky;
-std::stack<char> temp;
+std::stack<char> finished;
 
 void svit(byte position){
   if(0b00001000 & position){
@@ -330,12 +330,12 @@ void loop() {
           state = turnRight;
         }
       break;
-
+      /*
       case backward:  //=============================================================================
         //Timer3.resume();
         smerJizdy = -1;
       break;
-
+      */
       case crossroads:  //=============================================================================
 
         if(crossEnter){
@@ -362,19 +362,16 @@ void loop() {
           state = forward;
 
           while(!krizovatky.empty()){ // preskladani zasobniku
-            temp.push(krizovatky.top());
-            krizovatky.pop();
-          }
-          while(!temp.empty()){
-            krizovatky.push(krizovatky.top());
+            finished.push(krizovatky.top());
             krizovatky.pop();
           }
 
           while(digitalRead(pravyNaraznik)){}// cekani na pravy naraznik
           break;
         }
-        if(position == 0b00001011){break;}
-        if(position == 0b00001101){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
+
+        if(position == 0b00001101 || position == 0b00001011){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
+        if(current == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
         previous = current;
         current = position;
 
@@ -463,7 +460,7 @@ void loop() {
     }
 
 
-
+  
 
 
 
@@ -471,8 +468,107 @@ void loop() {
 
 
   }
-  else{
+  // Zavodni rezim
+  else{   
     switch(state){
+
+      case forward: //=============================================================================
+          //Timer3.resume(); 
+          smerJizdy = 1;
+          if(offset > uMax){offset = uMax;}
+          else if(offset < -uMax){offset = -uMax;}
+          pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
+
+          if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+            //Timer3.stop();
+            crossEnter = true;
+            pohyb(rychlostJizdy,rychlostJizdy);
+            start = millis();
+            distReset();
+            state = crossroads;
+          }
+          else if(position == 0b00001111){ // slepa
+            //Timer3.stop();
+            pohyb(0,0);
+            returning = true;
+            state = turnRight;
+          }
+      break;
+
+      case crossroads:  //=============================================================================
+
+        if(crossEnter){
+          while(getDist() < 1.0){}
+          current = position; 
+          crossEnter = false;
+        }
+
+        if(millis() - start > 100 && previous == 0b00000000){ // cil nalezen
+          pohyb(-150, 150);
+          for (int i =1; i<=12;i++){
+            LED(i, blue); 
+          }
+          delay(2000);
+          for (int i =1; i<=12;i++){
+            LED(i, red);  
+          }    
+          delay(2000);
+          for (int i =1; i<=12;i++){
+            LED(i, black);  
+          }  
+          pohyb(0,0);
+          while(true){}
+          break;
+        }
+
+        if(position == 0b00001101 || position == 0b00001011){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
+        if(current == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
+        previous = current;
+        current = position;
+
+        Serial.print(previous, BIN);
+        Serial.print("   ");
+        Serial.println(current, BIN);
+
+
+        if(detekce_zmeny_od_position(previous, current)){
+          
+          if(firstCross){state = forward; firstCross = false; break;}
+          pohyb(rychlostJizdy,rychlostJizdy);
+          while(getDist() < 15.0){}
+          pohyb(0,0);
+          char krizovatka = detekce_krizovatky(previous, current);
+          Serial.println(krizovatka);
+
+          switch(krizovatka){
+            case zatacka_L: state = turnLeft; break;
+            case zatacka_P: state = turnRight; break;
+
+            default:
+              switch(finished.top()){
+                case zatacka_L: state = turnLeft; break;
+                case zatacka_P: state = turnRight; break;
+                case rovne: state = forward; break;
+                case rovne_a_doleva: state = forward; break;
+                default: state = turnRight; break;
+              }
+              finished.pop();
+            break;
+          }
+        }
+      break;
+
+      
+
+      case turnRight: //=============================================================================
+        if(!started){turn(85, 1); started = true;}
+        if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward;}
+      break;
+
+      case turnLeft: //=============================================================================
+        if(!started){turn(85, -1); started = true;}
+        if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
+      break;
     }
   }
 }
