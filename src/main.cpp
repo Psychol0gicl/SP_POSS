@@ -9,31 +9,8 @@
 #include "encoder.h"
 #include "regulation.h"
 #include "krizovatky.h"
-
 // mame robota cislo 11
 
-// Parametry spojiteho PID regulatoru - paralelni forma s filtrovanou D slozkou, pro rychlost 120
-volatile float Kp = 0.3;
-float Ki = 1;
-float Kd = 0;   // D slozka je vypnuta
-float Tf = 0; 
-float Ts = 0.01; // perioda vzorkovani pro vypocet param regulatoru
-
-//Fyzikalni parametry PID na interni diskretni zesileni
-volatile const float ci=Ki*Ts/2; 
-volatile const float cd1=-(Ts-2*Tf)/(Ts+2*Tf); 
-volatile const float cd2=2*Kd/(Ts+2*Tf);
-
-volatile float wk = 0;    // pozad hodnota
-volatile float yk = 0;    // hodnota ze zpetne vazby - pravdepodobne offset z cidla
-volatile float ek = 0;    // reg odchylka
-volatile float ekm1 = 0;  // minula hodnota reg odchylky
-
-//globalni promenne pro interni stav integratoru a derivatoru
-volatile float yi = 0; 
-volatile float yd = 0;
-volatile float yp = 0;
-volatile float uk = 0; // vystup regulatoru
 volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
 
 // Levý motor
@@ -176,6 +153,29 @@ void svit(byte position){
     }
 }
 
+void vitezny_tanecek(){
+  buzzerOn();
+  pohyb(-150, 150);
+  for (int i =1; i<=12;i++){
+    LED(i, blue); 
+  }
+  buzzerOff();
+  delay(2000);
+  for (int i =1; i<=12;i++){
+    LED(i, red);  
+  } 
+  buzzerOn();   
+  delay(2000);
+  for (int i =1; i<=12;i++){
+    LED(i, blue); 
+  }
+  delay(2000);
+  for (int i =1; i<=12;i++){
+    LED(i, black);  
+  }
+  buzzerOff()  ;
+}
+
 /*
   LED(1, amber*0.5); // 300
   LED(2, orange*0.5); // 330
@@ -296,7 +296,6 @@ void loop() {
   }
 
   offset = RGBLineFollower.getPositionOffset();
-  yk = offset;
 
   if(abs(rozdilPasu) >= 20){LED(9, yellow);}
   else {LED(9, black);}
@@ -330,12 +329,6 @@ void loop() {
           state = turnRight;
         }
       break;
-      /*
-      case backward:  //=============================================================================
-        //Timer3.resume();
-        smerJizdy = -1;
-      break;
-      */
       case crossroads:  //=============================================================================
 
         if(crossEnter){
@@ -345,18 +338,7 @@ void loop() {
         }
 
         if(millis() - start > 100 && previous == 0b00000000){ // cil nalezen
-          pohyb(-150, 150);
-          for (int i =1; i<=12;i++){
-            LED(i, blue); 
-          }
-          delay(2000);
-          for (int i =1; i<=12;i++){
-            LED(i, red);  
-          }    
-          delay(2000);
-          for (int i =1; i<=12;i++){
-            LED(i, black);  
-          }  
+          vitezny_tanecek();
           pohyb(0,0);
           mapping = false;
           state = forward;
@@ -380,68 +362,55 @@ void loop() {
         Serial.println(current, BIN);
         if(detekce_zmeny_od_position(previous, current)){
           if(firstCross){state = forward; firstCross = false; break;}
-          pohyb(rychlostJizdy,rychlostJizdy);
+          pohyb(rychlostJizdy, rychlostJizdy);
           while(getDist() < 15.0){}
           pohyb(0,0);
-          char krizovatka = detekce_krizovatky(previous, current);
-          Serial.println(krizovatka);
-          if(returning){
 
+          if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
+            char krizovatka = krizovatky.top();
+            Serial.println(krizovatka);
+            krizovatky.pop();
             switch(krizovatka){
               case zatacka_L: state = turnLeft; break;
               case zatacka_P: state = turnRight; break;
+              case rovne: state = forward; break; 
 
-              default:
-                krizovatka = krizovatky.top();
-                krizovatky.pop();
-                switch(krizovatka){
-                  case zatacka_L: state = turnRight; break;
-                  case zatacka_P: state = turnLeft; break;
-                  case rovne: state = forward; break; 
-
-                  case tecko:
-                    krizovatky.push(zatacka_L);
-                    returning = false;
-                    state = forward;
-                  break;
-
-                  case kriz:
-                    krizovatky.push(rovne_a_doleva);
-                    returning = false;
-                    state = turnRight;
-                  break;
-
-                  case rovne_a_doleva:
-                    krizovatky.push(zatacka_L);
-                    returning = false;
-                    state = turnRight;
-                  break;
-
-                  case rovne_a_doprava:
-                    krizovatky.push(rovne);
-                    returning = false;
-                    state = turnRight;
-                  break;
-                }
+              case tecko:
+                krizovatky.push(zatacka_L);
+                returning = false;
+                state = forward;
               break;
+
+              case kriz:
+                krizovatky.push(rovne_a_doleva);
+                returning = false;
+                state = turnRight;
+              break;
+
+              case rovne_a_doleva:
+                krizovatky.push(zatacka_L);
+                returning = false;
+                state = turnRight;
+              break;
+
+              case rovne_a_doprava:
+                krizovatky.push(rovne);
+                returning = false;
+                state = turnRight;
+              break;
+                
             }
     
           }
-          else{
-            
+          else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
+            char krizovatka = detekce_krizovatky(previous, current);
+            Serial.println(krizovatka);
+            krizovatky.push(krizovatka);
             switch(krizovatka){
               case zatacka_L: state = turnLeft; break;
               case zatacka_P: state = turnRight; break;
-
-              case rovne_a_doleva: 
-                krizovatky.push(krizovatka);
-                state = forward; 
-              break;
-
-              default:
-                krizovatky.push(krizovatka);
-                state = turnRight;
-              break;
+              case rovne_a_doleva: state = forward; break;
+              default: state = turnRight;break;
             }
 
           }
@@ -458,17 +427,8 @@ void loop() {
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
       break;
     }
-
-
-  
-
-
-
-
-
-
   }
-  // Zavodni rezim
+  // Zavodni rezim ---------------------------------------------------------------------------------
   else{   
     switch(state){
 
@@ -504,18 +464,7 @@ void loop() {
         }
 
         if(millis() - start > 100 && previous == 0b00000000){ // cil nalezen
-          pohyb(-150, 150);
-          for (int i =1; i<=12;i++){
-            LED(i, blue); 
-          }
-          delay(2000);
-          for (int i =1; i<=12;i++){
-            LED(i, red);  
-          }    
-          delay(2000);
-          for (int i =1; i<=12;i++){
-            LED(i, black);  
-          }  
+          vitezny_tanecek();
           pohyb(0,0);
           while(true){}
           break;
@@ -532,28 +481,20 @@ void loop() {
 
 
         if(detekce_zmeny_od_position(previous, current)){
-          
           if(firstCross){state = forward; firstCross = false; break;}
           pohyb(rychlostJizdy,rychlostJizdy);
           while(getDist() < 15.0){}
           pohyb(0,0);
-          char krizovatka = detekce_krizovatky(previous, current);
+          char krizovatka = finished.top();
+          finished.pop();
           Serial.println(krizovatka);
 
           switch(krizovatka){
             case zatacka_L: state = turnLeft; break;
             case zatacka_P: state = turnRight; break;
-
-            default:
-              switch(finished.top()){
-                case zatacka_L: state = turnLeft; break;
-                case zatacka_P: state = turnRight; break;
-                case rovne: state = forward; break;
-                case rovne_a_doleva: state = forward; break;
-                default: state = turnRight; break;
-              }
-              finished.pop();
-            break;
+            case rovne: state = forward; break;
+            case rovne_a_doleva: state = forward; break;
+            default: state = turnRight; break;
           }
         }
       break;
