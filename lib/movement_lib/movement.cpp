@@ -64,7 +64,7 @@ bool otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doprava, -1 
   if ( leva & !stred1 & !stred2 & prava ){
     pohyb(0,0); return true;
   } else {
-    pohyb(rychlostJizdy*smer, -rychlostJizdy*smer); return false;
+    pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer); return false;
   }
 }
 
@@ -72,7 +72,7 @@ void otacej_dle_offsetu(int offset){
   if ( (offset < 10) & (-10 < offset)){
     pohyb(0,0);
   } else {
-    pohyb(-120, 120);
+    pohyb(-rychlostOtaceni, rychlostOtaceni);
   }
 
 }
@@ -80,7 +80,7 @@ void otacej_dle_offsetu(int offset){
 
 void turn(byte angle, int8_t smer){ // gyroskop umi max +- 179.9
   gyro.begin();       // + znamena doprava
-  pohyb(120*smer, -120*smer);
+  pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer);
   while(abs(gyro.getAngleZ()) < angle){gyro.update();}
   pohyb(0, 0);
 }

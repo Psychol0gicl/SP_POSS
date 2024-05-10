@@ -23,7 +23,8 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 140;
+int rychlostJizdy = 100;
+int rychlostOtaceni = 120;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -151,6 +152,38 @@ void svit(byte position){
     else{
       LED(1, blue);
     }
+}
+
+void dispCrossroad(char crossroad){
+  LED(3, black);  // 0
+  LED(6, black);  // 90
+  //LED(9, black);  // 180
+  LED(12, black); // 270
+  switch(crossroad){
+    case tecko: 
+      LED(6, yellow);
+      LED(12, yellow);
+    break;
+    case kriz:
+      LED(3, yellow);
+      LED(6, yellow);
+      LED(12, yellow);
+    break;
+    case rovne_a_doleva:
+      LED(3, yellow);
+      LED(12, yellow);
+    break;
+    case rovne_a_doprava:
+      LED(3, yellow);
+      LED(6, yellow);
+    break;
+    case zatacka_L:
+      LED(12, yellow);
+    break;
+    case zatacka_P:
+      LED(6, yellow);
+    break;
+  }
 }
 
 void vitezny_tanecek(){
@@ -332,12 +365,12 @@ void loop() {
       case crossroads:  //=============================================================================
 
         if(crossEnter){
-          while(getDist() < 1.0){}
+          while(getDist() > 1.0){}
           current = position; 
           crossEnter = false;
         }
 
-        if(millis() - start > 100 && previous == 0b00000000){ // cil nalezen
+        if(getDist() > 50 && previous == 0b00000000){ // cil nalezen
           vitezny_tanecek();
           pohyb(0,0);
           mapping = false;
@@ -354,17 +387,26 @@ void loop() {
 
         if(position == 0b00001101 || position == 0b00001011){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
         if(current == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
+        if(position == 0b00000000 && (current == 0b00001000 || current == 0b00000001)){break;}
         previous = current;
         current = position;
 
         Serial.print(previous, BIN);
         Serial.print("   ");
         Serial.println(current, BIN);
-        if(detekce_zmeny_od_position(previous, current)){
-          if(firstCross){state = forward; firstCross = false; break;}
+        if(getDist() > 20.0 || previous != current){
+          
           pohyb(rychlostJizdy, rychlostJizdy);
-          while(getDist() < 15.0){}
-          pohyb(0,0);
+          while(getDist() < 72.0){}
+          if(firstCross){
+            state = forward; 
+            firstCross = false; 
+            Serial.println("first"); 
+            previous = -1;
+            current = -1;
+            break;
+          }
+          else{pohyb(0,0);}
 
           if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
             char krizovatka = krizovatky.top();
@@ -404,6 +446,7 @@ void loop() {
           }
           else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
             char krizovatka = detekce_krizovatky(previous, current);
+            dispCrossroad(krizovatka);
             Serial.println(krizovatka);
             krizovatky.push(krizovatka);
             switch(krizovatka){

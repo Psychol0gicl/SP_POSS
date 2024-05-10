@@ -11,6 +11,7 @@ extern const int inMotorLevy1;
 extern const int inMotorLevy2;
 
 extern int rychlostJizdy;
+extern int rychlostOtaceni;
 extern int minRychlost;
 extern int maxRychlost;
 
