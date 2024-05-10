@@ -363,13 +363,13 @@ void loop() {
         }
       break;
       case crossroads:  //=============================================================================
-
+        /*
         if(crossEnter){
-          while(getDist() > 1.0){}
+          while(getDist() > 0.5){}
           current = position; 
           crossEnter = false;
         }
-
+        */
         if(getDist() > 50 && previous == 0b00000000){ // cil nalezen
           vitezny_tanecek();
           pohyb(0,0);
@@ -387,14 +387,21 @@ void loop() {
 
         if(position == 0b00001101 || position == 0b00001011){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
         if(current == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
-        if(position == 0b00000000 && (current == 0b00001000 || current == 0b00000001)){break;}
+        if(position == 0b00000000 && (current == 0b00001000 || current == 0b00000001) && getDist() > 1){break;}
         previous = current;
         current = position;
 
         Serial.print(previous, BIN);
         Serial.print("   ");
         Serial.println(current, BIN);
-        if(getDist() > 20.0 || previous != current){
+
+        if(getDist() > 30){
+          if(offset > uMax){offset = uMax;}
+          else if(offset < -uMax){offset = -uMax;}
+          pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
+        }
+
+        if(getDist() > 20.0 && previous != current){
           
           pohyb(rychlostJizdy, rychlostJizdy);
           while(getDist() < 72.0){}
@@ -413,8 +420,8 @@ void loop() {
             Serial.println(krizovatka);
             krizovatky.pop();
             switch(krizovatka){
-              case zatacka_L: state = turnLeft; break;
-              case zatacka_P: state = turnRight; break;
+              case zatacka_L: state = turnRight; break;
+              case zatacka_P: state = turnLeft; break;
               case rovne: state = forward; break; 
 
               case tecko:
