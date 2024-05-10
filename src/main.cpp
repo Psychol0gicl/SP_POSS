@@ -23,7 +23,7 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 100;
+int rychlostJizdy = 120;
 int rychlostOtaceni = 120;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
@@ -385,9 +385,14 @@ void loop() {
           break;
         }
 
-        if(position == 0b00001101 || position == 0b00001011){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
-        if(current == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
-        if(position == 0b00000000 && (current == 0b00001000 || current == 0b00000001) && getDist() > 1){break;}
+        if(position == 0b00001101 || position == 0b00001011){ //chceme regulovat
+          if(offset > uMax){offset = uMax;}
+          else if(offset < -uMax){offset = -uMax;}
+          pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
+          break;
+        } // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
+        if(previous == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
+        if(position == 0b00000000 && (previous == 0b00001000 || previous == 0b00000001) && getDist() > 1){break;}
         if(position == 0b00001001 || position == 0b00001111){
           
           pohyb(rychlostJizdy, rychlostJizdy);
@@ -397,7 +402,6 @@ void loop() {
             firstCross = false; 
             Serial.println("first"); 
             previous = -1;
-            current = -1;
             break;
           }
           else{pohyb(0,0);}
@@ -436,10 +440,10 @@ void loop() {
               break;
                 
             }
-    
+            break;
           }
           else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
-            char krizovatka = detekce_krizovatky(previous, current);
+            char krizovatka = detekce_krizovatky(previous, position);
             dispCrossroad(krizovatka);
             Serial.println(krizovatka);
             krizovatky.push(krizovatka);
@@ -450,22 +454,19 @@ void loop() {
               default: state = turnRight;break;
             }
 
+            Serial.print(previous, BIN);
+            Serial.print("   ");
+            Serial.println(position, BIN);
+
+            break;
           }
         }
-        previous = current;
-        current = position;
 
         Serial.print(previous, BIN);
         Serial.print("   ");
-        Serial.println(current, BIN);
+        Serial.println(position, BIN);
 
-        if(getDist() > 30){
-          if(offset > uMax){offset = uMax;}
-          else if(offset < -uMax){offset = -uMax;}
-          pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
-        }
-
-        
+        previous = position;
       break;
 
       case turnRight: //=============================================================================
