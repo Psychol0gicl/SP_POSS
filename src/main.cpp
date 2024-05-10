@@ -362,6 +362,8 @@ void loop() {
           state = turnRight;
         }
       break;
+
+      
       case crossroads:  //=============================================================================
         /*
         if(crossEnter){
@@ -370,6 +372,10 @@ void loop() {
           crossEnter = false;
         }
         */
+        Serial.print(previous, BIN);
+        Serial.print("   ");
+        Serial.println(position, BIN);
+
         if(getDist() > 50 && previous == 0b00000000){ // cil nalezen
           vitezny_tanecek();
           pohyb(0,0);
@@ -392,7 +398,7 @@ void loop() {
           break;
         } // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
         if(previous == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
-        if(position == 0b00000000 && (previous == 0b00001000 || previous == 0b00000001) && getDist() > 1){break;}
+        //if(position == 0b00000000 && (previous == 0b00001000 || previous == 0b00000001) && getDist() > 1){break;}
         if(position == 0b00001001 || position == 0b00001111){
           
           pohyb(rychlostJizdy, rychlostJizdy);
@@ -454,17 +460,9 @@ void loop() {
               default: state = turnRight;break;
             }
 
-            Serial.print(previous, BIN);
-            Serial.print("   ");
-            Serial.println(position, BIN);
-
             break;
           }
         }
-
-        Serial.print(previous, BIN);
-        Serial.print("   ");
-        Serial.println(position, BIN);
 
         previous = position;
       break;
