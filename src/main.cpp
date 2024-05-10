@@ -183,6 +183,11 @@ void dispCrossroad(char crossroad){
     case zatacka_P:
       LED(6, yellow);
     break;
+    case 'x': //prusvih
+      for (int i =1; i<=12;i++){
+        LED(i, red);  
+      } 
+    break;
   }
 }
 
@@ -343,8 +348,9 @@ void loop() {
       case forward: //=============================================================================
         //Timer3.resume(); 
         smerJizdy = 1;
-        if(offset > uMax){offset = uMax;}
-        else if(offset < -uMax){offset = -uMax;}
+
+        if(offset > uMax ) {offset = uMax;} //regulace
+        else if(offset < -uMax) {offset = -uMax;}
         pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
@@ -365,6 +371,7 @@ void loop() {
 
       
       case crossroads:  //=============================================================================
+        //jsme na krizovatce
         /*
         if(crossEnter){
           while(getDist() > 0.5){}
@@ -372,8 +379,10 @@ void loop() {
           crossEnter = false;
         }
         */
+        Serial.print("Previous: ");
         Serial.print(previous, BIN);
         Serial.print("   ");
+        Serial.print("Position: ");
         Serial.println(position, BIN);
 
         if(getDist() > 50 && previous == 0b00000000){ // cil nalezen
@@ -397,12 +406,16 @@ void loop() {
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
           break;
         } // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
+
+      
         if(previous == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
         //if(position == 0b00000000 && (previous == 0b00001000 || previous == 0b00000001) && getDist() > 1){break;}
-        if(position == 0b00001001 || position == 0b00001111){
+        
+        if(position == 0b00001001 || position == 0b00001111){ //vyjeli jsme z krizovatky
           
           pohyb(rychlostJizdy, rychlostJizdy);
-          while(getDist() < 72.0){}
+          while(getDist() < 72.0){} 
+          
           if(firstCross){
             state = forward; 
             firstCross = false; 
@@ -412,7 +425,7 @@ void loop() {
           }
           else{pohyb(0,0);}
 
-          if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
+          if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--
             char krizovatka = krizovatky.top();
             Serial.println(krizovatka);
             krizovatky.pop();
@@ -446,9 +459,9 @@ void loop() {
               break;
                 
             }
-            break;
+            break; // konec case crossroads
           }
-          else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.--
+          else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.----.--.--.--.--.--.--.--.--.--.--.--.--.--.--
             char krizovatka = detekce_krizovatky(previous, position);
             dispCrossroad(krizovatka);
             Serial.println(krizovatka);
@@ -457,15 +470,15 @@ void loop() {
               case zatacka_L: state = turnLeft; break;
               case zatacka_P: state = turnRight; break;
               case rovne_a_doleva: state = forward; break;
-              default: state = turnRight;break;
+              default: state = turnRight; break;
             }
 
-            break;
+            break; // konec case crossroads
           }
         }
 
-        previous = position;
-      break;
+        previous = position; //proc je tohle az tady dole?
+      break; // konec case crossroads
 
       case turnRight: //=============================================================================
         if(!started){turn(85, 1); started = true;}
@@ -478,10 +491,10 @@ void loop() {
       break;
     }
   }
+  
   // Zavodni rezim ---------------------------------------------------------------------------------
   else{   
     switch(state){
-
       case forward: //=============================================================================
           //Timer3.resume(); 
           smerJizdy = 1;
@@ -506,7 +519,6 @@ void loop() {
       break;
 
       case crossroads:  //=============================================================================
-
         if(crossEnter){
           while(getDist() < 1.0){}
           current = position; 
