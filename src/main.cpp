@@ -388,20 +388,7 @@ void loop() {
         if(position == 0b00001101 || position == 0b00001011){break;} // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
         if(current == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
         if(position == 0b00000000 && (current == 0b00001000 || current == 0b00000001) && getDist() > 1){break;}
-        previous = current;
-        current = position;
-
-        Serial.print(previous, BIN);
-        Serial.print("   ");
-        Serial.println(current, BIN);
-
-        if(getDist() > 30){
-          if(offset > uMax){offset = uMax;}
-          else if(offset < -uMax){offset = -uMax;}
-          pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
-        }
-
-        if(getDist() > 20.0 && previous != current){
+        if(position == 0b00001001 || position == 0b00001111){
           
           pohyb(rychlostJizdy, rychlostJizdy);
           while(getDist() < 72.0){}
@@ -465,6 +452,20 @@ void loop() {
 
           }
         }
+        previous = current;
+        current = position;
+
+        Serial.print(previous, BIN);
+        Serial.print("   ");
+        Serial.println(current, BIN);
+
+        if(getDist() > 30){
+          if(offset > uMax){offset = uMax;}
+          else if(offset < -uMax){offset = -uMax;}
+          pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
+        }
+
+        
       break;
 
       case turnRight: //=============================================================================
