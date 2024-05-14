@@ -68,11 +68,13 @@ bool otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doprava, -1 
   }
 }
 
-void otacej_dle_offsetu(int offset){
-  if ( (offset < 10) & (-10 < offset)){
+bool otacej_dle_offsetu(int offset, int8_t smer){
+  if ( (offset < 20) && (-20 < offset)){
     pohyb(0,0);
+    return true;
   } else {
-    pohyb(-rychlostOtaceni, rychlostOtaceni);
+    pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer);
+    return false;
   }
 
 }
