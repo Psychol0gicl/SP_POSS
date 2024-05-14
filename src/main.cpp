@@ -23,8 +23,8 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 80;
-int rychlostOtaceni = 110 ;
+int rychlostJizdy = 85;
+int rychlostOtaceni = 130 ;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -193,6 +193,7 @@ void dispCrossroad(char crossroad){
 }
 
 void vitezny_tanecek(){
+  pohyb(0,0);
   buzzerOn();
   buzzer.tone(880 , 1000);
 
@@ -488,7 +489,7 @@ void loop() {
               break;
                 
             }
-            delay(300);
+            // delay(300);
             break; // konec case crossroads
 
           }
@@ -499,7 +500,7 @@ void loop() {
             Serial.print("   ");
             Serial.print("Final Position: ");
             Serial.println(position, BIN);
-            delay(300); //pockani na vypocet most frequent
+            // delay(300); //pockani na vypocet most frequent
             char krizovatka = detekce_krizovatky(previous, position);
             dispCrossroad(krizovatka);
 
@@ -511,7 +512,7 @@ void loop() {
               case rovne_a_doleva: state = forward; break;
               default: state = turnRight; break;
             }
-            delay(300);
+            // delay(300);
             break; // konec case crossroads
           }
         }
@@ -555,7 +556,7 @@ void loop() {
       case turnRight: //=============================================================================
       position = RGBLineFollower.getPositionState();
         offset = RGBLineFollower.getPositionOffset();
-        if(!started){turn(79, 1); started = true; state = turnRight;}
+        if(!started){turn(78, 1); started = true; state = turnRight;}
        // pohyb(rychlostOtaceni, -rychlostOtaceni);
        if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
         if( otacej_dle_offsetu(offset, 1)){started = false; state = forward;}
@@ -567,7 +568,7 @@ void loop() {
       offset = RGBLineFollower.getPositionOffset();
       // delay(300);
       // pohyb(-rychlostOtaceni, rychlostOtaceni);
-        if(!started){turn(79, -1); started = true; state = turnLeft;}
+        if(!started){turn(78, -1); started = true; state = turnLeft;}
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
         if(otacej_dle_offsetu(offset, -1) ){started = false; state = forward; }
         
@@ -664,7 +665,7 @@ void loop() {
             Serial.print("   ");
             Serial.print("Final Position: ");
             Serial.println(position, BIN);
-            delay(300); //pockani na vypocet most frequent
+            // delay(300); //pockani na vypocet most frequent
             char krizovatka =  finished.top();
             tmp.push(krizovatka);
             finished.pop();
@@ -678,7 +679,7 @@ void loop() {
               case rovne_a_doleva: state = forward; break;
               default: state = turnRight; break;
             }
-            delay(300);
+            // delay(300);
             break; // konec case crossroads
           
         }
