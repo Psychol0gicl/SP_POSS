@@ -23,8 +23,9 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 90;
-int rychlostOtaceni = 130 ;
+int rychlostJizdy = 80; //80-90 je sweet spot pro vetsinu robotu it seems
+int zavodniRychlost = 120;
+int rychlostOtaceni = 120 ;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -630,12 +631,12 @@ void loop() {
 
         if(offset > uMax ) {offset = uMax;} //regulace
         else if(offset < -uMax) {offset = -uMax;}
-        pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
+        pohyb(smerJizdy*zavodniRychlost + smerJizdy*offset, smerJizdy*zavodniRychlost - smerJizdy*offset);
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
           //Timer3.stop();
           
-          pohyb(rychlostJizdy,rychlostJizdy);
+          pohyb(zavodniRychlost,zavodniRychlost);
           
           distReset();
           previous = position;
