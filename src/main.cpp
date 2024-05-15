@@ -23,7 +23,7 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 85;
+int rychlostJizdy = 90;
 int rychlostOtaceni = 130 ;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
@@ -321,6 +321,17 @@ void setup() {
   // inicializace casovace pro regulator
   // Timer3.initialize(int(Ts*1000000));
   // Timer3.attachInterrupt(calc_pid); 
+//   finished.push(kriz);
+//   finished.push(zatacka_L);
+//   finished.push(zatacka_L);
+//   finished.push(rovne_a_doleva);
+// finished.push(zatacka_P);
+// finished.push(zatacka_P);
+// finished.push(zatacka_L);
+// finished.push(zatacka_P);
+// finished.push(zatacka_L);
+// finished.push(rovne_a_doleva);
+// mapping = false;
 }
 
 
@@ -337,6 +348,7 @@ int offset = 0;
 
 byte state = forward;
 bool mapping = true;
+
 bool returning = false;
 
 long start = 0;
@@ -346,6 +358,16 @@ bool firstCross = false;
 int uMax = 60;
 
 void loop() {
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
 
@@ -550,10 +572,10 @@ void loop() {
       break; // konec case crossroads
 
       case turnRight: //=============================================================================
-      if(!started){turn(80, 1); started = true; state = turnRight;}
+      
       position = RGBLineFollower.getPositionState();
         offset = RGBLineFollower.getPositionOffset();
-        
+      if(!started){turn(80, 1); started = true; state = turnRight;}  
         if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);  
@@ -564,9 +586,10 @@ void loop() {
       break;
 
       case turnLeft: //=============================================================================
-      if(!started){turn(80, -1); started = true; state = turnLeft;} 
+      
       position = RGBLineFollower.getPositionState();
       offset = RGBLineFollower.getPositionOffset();
+      if(!started){turn(80, -1); started = true; state = turnLeft;} 
       // delay(300);
       // pohyb(-rychlostOtaceni, rychlostOtaceni);
         
@@ -682,7 +705,7 @@ void loop() {
               case rovne_a_doleva: state = forward; break;
               default: state = turnRight; break;
             }
-            // delay(300);
+            delay(300);
             break; // konec case crossroads
           
         }
@@ -719,33 +742,28 @@ void loop() {
       break; // konec case crossroads
 
       case turnRight: //=============================================================================
-      delay(200);
-      if(!started){turn(80, 1); started = true; state = turnRight;}
+      
       position = RGBLineFollower.getPositionState();
         offset = RGBLineFollower.getPositionOffset();
-        
-       // pohyb(rychlostOtaceni, -rychlostOtaceni);
+        if(!started){turn(80, 1); started = true; state = turnRight;}
+       
        if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
        if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
-        // if( otacej_dle_offsetu(offset, 1)){started = false; state = forward;}
+        
         
       break;
 
       case turnLeft: //=============================================================================
-      delay(200);
-      if(!started){turn(80, -1); started = true; state = turnLeft;}
+      
       position = RGBLineFollower.getPositionState();
       offset = RGBLineFollower.getPositionOffset();
-      // delay(300);
-      // pohyb(-rychlostOtaceni, rychlostOtaceni);
-        
+        if(!started){turn(80, -1); started = true; state = turnLeft;}
         if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
-        // if(otacej_dle_offsetu(offset, -1) ){started = false; state = forward; }
         
       break;
     }
