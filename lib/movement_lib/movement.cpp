@@ -51,25 +51,32 @@ void pohyb(int rychlostL, int rychlostR){ // doleva - levy opacny
     }
 }
 
-bool otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doprava, -1 - doleva
+bool otacej_dokud_nenajdes_caru(byte position, int8_t smer){ // 1 - doprava, -1 - doleva //14.5. Martinovo napad - zmen to na detekci stavu 1101, 1011 a 1001, nebo na detekci pouze jednim vnitrnim
   // 1001 jsme na care
   // 1111 jsme mimo caru
   // 0000 krizovatka
   // byte cara = 0b1001;
   // obsolete => otacej dle offsetu 
-  boolean leva = (position & 0b01000); 
-  boolean stred1 = (position & 0b00100);
-  boolean stred2 = (position & 0b00010);
-  boolean prava = (position & 0b00001);
-  if ( leva & !stred1 & !stred2 & prava ){
-    pohyb(0,0); return true;
-  } else {
-    pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer); return false;
+  // boolean leva = (position & 0b01000); 
+  // boolean stred1 = (position & 0b00100);
+  // boolean stred2 = (position & 0b00010);
+  // boolean prava = (position & 0b00001);
+  // if ( leva & !stred1 & !stred2 & prava ){
+  //   pohyb(0,0); return true;
+  // } else {
+  //   pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer); return false;
+  // }
+  if(position == 0b00001001 || position == 0b00001101 || position == 0b00001011){
+    pohyb(0,0); 
+    return true;
+  } else{
+    pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer); 
+    return false;
   }
 }
 
 bool otacej_dle_offsetu(int offset, int8_t smer){
-  if ( (offset < 20) && (-20 < offset)){
+  if ( (offset < 10) && (-10 < offset)){
     pohyb(0,0);
     return true;
   } else {

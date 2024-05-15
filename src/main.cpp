@@ -357,7 +357,7 @@ void loop() {
   if(returning){LED(8, red); LED(10,red);}
   else{LED(8, black); LED(10,black);}
   
-  if(position == 0b00000011){position = 0b00000001; }
+  if(position == 0b00000011){position = 0b00000001; } // 14.5. tohle mozna bude muset byt smazano kvuli otaceni 
   if(position == 0b00001100){position = 0b00001000; } 
   switch(position){// necessary evil
     case 0b1000: position = 0b0001; break; 
@@ -365,13 +365,9 @@ void loop() {
   }
   offset = RGBLineFollower.getPositionOffset();
 
-  if(abs(rozdilPasu) >= 20){LED(9, yellow);}
-  else {LED(9, black);}
 
-  // otacej_dokud_nenajdes_caru(position);
-  // otacej_dle_offsetu(offset);
-  Serial.print("State:");
-  Serial.println(state);
+  // Serial.print("State:");
+  // Serial.println(state);
   if(mapping){// mapovaci rezim
 
     switch(state){
@@ -673,12 +669,11 @@ void loop() {
             Serial.println(position, BIN);
             // delay(300); //pockani na vypocet most frequent
             char krizovatka =  finished.top();
-            tmp.push(krizovatka);
+            krizovatky.push(krizovatka);
             finished.pop();
             dispCrossroad(krizovatka);
 
             Serial.println(krizovatka);
-            krizovatky.push(krizovatka);
             switch(krizovatka){
               case zatacka_L: state = turnLeft; break;
               case zatacka_P: state = turnRight; break;
@@ -724,7 +719,7 @@ void loop() {
       case turnRight: //=============================================================================
       position = RGBLineFollower.getPositionState();
         offset = RGBLineFollower.getPositionOffset();
-        if(!started){turn(85, 1); started = true; state = turnRight;}
+        if(!started){turn(80, 1); started = true; state = turnRight;}
        // pohyb(rychlostOtaceni, -rychlostOtaceni);
        if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
@@ -739,7 +734,7 @@ void loop() {
       offset = RGBLineFollower.getPositionOffset();
       // delay(300);
       // pohyb(-rychlostOtaceni, rychlostOtaceni);
-        if(!started){turn(85, -1); started = true; state = turnLeft;}
+        if(!started){turn(80, -1); started = true; state = turnLeft;}
         if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
