@@ -357,8 +357,8 @@ void loop() {
   if(returning){LED(8, red); LED(10,red);}
   else{LED(8, black); LED(10,black);}
   
-  if(position == 0b00000011){position = 0b00000001; } // 14.5. tohle mozna bude muset byt smazano kvuli otaceni 
-  if(position == 0b00001100){position = 0b00001000; } 
+  // if(position == 0b00000011){position = 0b00000001; } // 14.5. tohle mozna bude muset byt smazano kvuli otaceni 
+  // if(position == 0b00001100){position = 0b00001000; } 
   switch(position){// necessary evil
     case 0b1000: position = 0b0001; break; 
     case 0b0001: position = 0b1000; break; 
@@ -382,9 +382,9 @@ void loop() {
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
           //Timer3.stop();
-          crossEnter = true;
+          
           pohyb(rychlostJizdy,rychlostJizdy);
-          start = millis();
+          
           distReset();
           previous = position;
           // pohyb(0,0);
@@ -550,29 +550,31 @@ void loop() {
       break; // konec case crossroads
 
       case turnRight: //=============================================================================
+      if(!started){turn(80, 1); started = true; state = turnRight;}
       position = RGBLineFollower.getPositionState();
         offset = RGBLineFollower.getPositionOffset();
-        if(!started){turn(80, 1); started = true; state = turnRight;}
+        
         if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);  
        // pohyb(rychlostOtaceni, -rychlostOtaceni);
        if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
-        if( otacej_dle_offsetu(offset, 1)){started = false; state = forward;}
+        // if( otacej_dle_offsetu(offset, 1)){started = false; state = forward;}
         
       break;
 
       case turnLeft: //=============================================================================
+      if(!started){turn(80, -1); started = true; state = turnLeft;} 
       position = RGBLineFollower.getPositionState();
       offset = RGBLineFollower.getPositionOffset();
       // delay(300);
       // pohyb(-rychlostOtaceni, rychlostOtaceni);
-        if(!started){turn(80, -1); started = true; state = turnLeft;} //zkus 75
+        
         if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
-        if(otacej_dle_offsetu(offset, -1) ){started = false; state = forward; }
+        // if(otacej_dle_offsetu(offset, -1) ){started = false; state = forward; }
         
       break;
     }
@@ -595,9 +597,9 @@ void loop() {
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
           //Timer3.stop();
-          crossEnter = true;
+          
           pohyb(rychlostJizdy,rychlostJizdy);
-          start = millis();
+          
           distReset();
           previous = position;
           // pohyb(0,0);
@@ -717,29 +719,33 @@ void loop() {
       break; // konec case crossroads
 
       case turnRight: //=============================================================================
+      delay(200);
+      if(!started){turn(80, 1); started = true; state = turnRight;}
       position = RGBLineFollower.getPositionState();
         offset = RGBLineFollower.getPositionOffset();
-        if(!started){turn(80, 1); started = true; state = turnRight;}
+        
        // pohyb(rychlostOtaceni, -rychlostOtaceni);
        if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
        if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
-        if( otacej_dle_offsetu(offset, 1)){started = false; state = forward;}
+        // if( otacej_dle_offsetu(offset, 1)){started = false; state = forward;}
         
       break;
 
       case turnLeft: //=============================================================================
+      delay(200);
+      if(!started){turn(80, -1); started = true; state = turnLeft;}
       position = RGBLineFollower.getPositionState();
       offset = RGBLineFollower.getPositionOffset();
       // delay(300);
       // pohyb(-rychlostOtaceni, rychlostOtaceni);
-        if(!started){turn(80, -1); started = true; state = turnLeft;}
+        
         if(offset > uMax){offset = uMax;}
           else if(offset < -uMax){offset = -uMax;}
           pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }
-        if(otacej_dle_offsetu(offset, -1) ){started = false; state = forward; }
+        // if(otacej_dle_offsetu(offset, -1) ){started = false; state = forward; }
         
       break;
     }
