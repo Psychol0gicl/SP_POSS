@@ -25,7 +25,7 @@ const int inMotorLevy2 = 46;
 
 //int rychlostJizdy = 80; //80-90 je sweet spot pro vetsinu robotu it seems
 int crossSpeed = 80;
-int forwardSpeed = 100;
+int forwardSpeed = 80;
 int rychlostJizdy = forwardSpeed;
 int zavodniRychlost = 150;
 int rychlostOtaceni = 120 ;
