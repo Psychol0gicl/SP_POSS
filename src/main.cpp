@@ -362,6 +362,37 @@ bool crossEnter = false;
 bool firstCross = true;
 int uMax = 60;
 
+String inputString = "";
+String inputStrNumber = "";
+char inChar = 0;
+
+void speedChange(){
+
+  while(inChar != '\n'){
+    if(Serial.available()){
+      inChar = (char)Serial.read();
+      if((inChar != 10) & (inChar != 13)){
+        inputString += inChar;
+        if(isDigit(inChar) | (inChar == '-') | (inChar == '.')){
+          inputStrNumber += inChar;
+        }
+      }
+    }
+  }
+
+  Serial.println(inputString);
+  if(inputString.startsWith("f=")){
+    zavodniRychlost = inputStrNumber.toInt();
+  }
+  else if(inputString.startsWith("t=")){
+    rychlostOtaceni = inputStrNumber.toInt();
+  }
+
+  inputString = "";
+  inputStrNumber = "";
+  inChar = 0;
+}
+
 void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
@@ -386,7 +417,8 @@ void loop() {
         else if(offset < -uMax) {offset = -uMax;}
         pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
 
-        if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+        //if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+        if(!position & 0b00001000 || !position & 0b00000001){ // krizovatka
           rychlostJizdy = crossSpeed;
           pohyb(rychlostJizdy,rychlostJizdy);
           distReset();
@@ -523,6 +555,7 @@ void loop() {
             svit(position);
             LED(7, green); 
             LED(11, green);  
+            if(Serial.available()){speedChange();}
             }
           break;
         }
@@ -588,7 +621,8 @@ void loop() {
         else if(offset < -uMax) {offset = -uMax;}
         pohyb(smerJizdy*zavodniRychlost + smerJizdy*offset, smerJizdy*zavodniRychlost - smerJizdy*offset);
 
-        if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+        //if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+        if(!position & 0b00001000 || !position & 0b00000001){ // krizovatka
           pohyb(zavodniRychlost,zavodniRychlost);
           distReset();
           previous = position;
@@ -667,6 +701,7 @@ void loop() {
           svit(position);
             LED(7, green); 
             LED(11, green);  
+            if(Serial.available()){speedChange();}
           }
              for (int i =1; i<=12;i++){
                     LED(i, black); 
