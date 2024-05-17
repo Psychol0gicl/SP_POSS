@@ -23,7 +23,10 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 90; //80-90 je sweet spot pro vetsinu robotu it seems
+//int rychlostJizdy = 80; //80-90 je sweet spot pro vetsinu robotu it seems
+int crossSpeed = 80;
+int forwardSpeed = 100;
+int rychlostJizdy = forwardSpeed;
 int zavodniRychlost = 150;
 int rychlostOtaceni = 120 ;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
@@ -384,6 +387,7 @@ void loop() {
         pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
 
         if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
+          rychlostJizdy = crossSpeed;
           pohyb(rychlostJizdy,rychlostJizdy);
           distReset();
           previous = position;
@@ -413,6 +417,7 @@ void loop() {
           pohyb(rychlostJizdy, rychlostJizdy);
           while(getDist() < 75){} 
           // delay(200);
+          rychlostJizdy = forwardSpeed;
           if(firstCross){
             state = forward; 
             firstCross = false; 
@@ -506,6 +511,7 @@ void loop() {
           pohyb(0,0);
           mapping = false;
           state = forward;
+          rychlostJizdy = crossSpeed;
 
           while(!krizovatky.empty()){ // preskladani zasobniku
             finished.push(krizovatky.top());
