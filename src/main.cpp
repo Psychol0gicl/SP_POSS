@@ -23,8 +23,8 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-int rychlostJizdy = 100; //80-90 je sweet spot pro vetsinu robotu it seems
-int zavodniRychlost = 100;
+int rychlostJizdy = 90; //80-90 je sweet spot pro vetsinu robotu it seems
+int zavodniRychlost = 150;
 int rychlostOtaceni = 120 ;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
@@ -526,7 +526,7 @@ void loop() {
       case turnRight: //=============================================================================
         // offset = RGBLineFollower.getPositionOffset();
         if(!started){
-          turn(85, 1); 
+          turn(45, 1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState(); // HERE - ale nemelo by to funkci  otacej_dokud_nenajdes_caru() vadit
@@ -541,7 +541,7 @@ void loop() {
       case turnLeft: //=============================================================================
         // offset = RGBLineFollower.getPositionOffset();
         if(!started){
-          turn(85, -1); 
+          turn(45, -1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState(); // HERE
@@ -675,7 +675,7 @@ void loop() {
         position = RGBLineFollower.getPositionState(); // HERE
         // offset = RGBLineFollower.getPositionOffset();
         if(!started){
-          turn(87, 1); 
+          turn(45, 1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState();
@@ -690,7 +690,7 @@ void loop() {
         position = RGBLineFollower.getPositionState(); // HERE
         // offset = RGBLineFollower.getPositionOffset(); 
         if(!started){
-          turn(87, -1); 
+          turn(45, -1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState();
