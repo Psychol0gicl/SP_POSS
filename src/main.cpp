@@ -393,6 +393,7 @@ char inChar = 0;
 //   inChar = 0;
 // }
 
+
 void loop() {
   // sejmutí dat z detektoru cary
   RGBLineFollower.loop();
@@ -630,11 +631,6 @@ void loop() {
           previous = position;
           state = crossroads;
         }
-        else if(position == 0b00001111){ // slepa
-          //pohyb(0,0);
-          returning = true;
-          state = turnRight;
-        }
       break;
 
       
@@ -663,7 +659,7 @@ void loop() {
             }
             break;
             
-          } //else{pohyb(0,0); }
+          } else{pohyb(0,0); }
           //  // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.----.--.--.--.--.--.--.--.--.--.--.--.--.--.--
           //   Serial.print("Final Previous: ");
           //   Serial.print(previous, BIN);
