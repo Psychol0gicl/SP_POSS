@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "stack": "cpp"
+        "stack": "cpp",
+        "functional": "cpp",
+        "memory": "cpp"
     }
 }
