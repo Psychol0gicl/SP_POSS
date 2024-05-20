@@ -207,7 +207,7 @@ void vitezny_tanecek(){
   buzzerOff();
   delay(2000);
   for (int i =1; i<=12;i++){
-    LED(i, red);  
+    LED(i,indigo );  
   }
   buzzerOn();  
   buzzer.tone(440, 1000); 
