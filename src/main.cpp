@@ -10,6 +10,7 @@
 #include "regulation.h"
 #include "krizovatky.h"
 // mame robota cislo 11
+//cas zavodu 36 
 
 volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
 
@@ -27,8 +28,8 @@ const int inMotorLevy2 = 46;
 int crossSpeed = 80;
 int forwardSpeed = 150;
 int rychlostJizdy = forwardSpeed;
-int zavodniRychlost = 150;
-int rychlostOtaceni = 120 ;
+int zavodniRychlost = 170;
+int rychlostOtaceni = 150 ;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -222,6 +223,7 @@ void vitezny_tanecek(){
 }
 
 int findMostFrequent(std::stack<int>& stack) {
+    // Serial.println(stack.size());
     const int MAX_VALUE = 17; // Adjust this according to the range of integers in your stack
     int intCounts[MAX_VALUE] = {0}; // Initialize array to store counts
 
@@ -231,7 +233,13 @@ int findMostFrequent(std::stack<int>& stack) {
         intCounts[currentInt]++;
         stack.pop();
     }
-
+    Serial.println('n');
+    for(int i = 0; i < MAX_VALUE; i++){
+      Serial.print("i:");
+      Serial.println(i);
+      Serial.println(intCounts[i]);
+      
+    }
     // Find the most frequent integer
     int mostFrequentInt;
     int maxCount = 0;
@@ -241,7 +249,8 @@ int findMostFrequent(std::stack<int>& stack) {
             mostFrequentInt = i;
         }
     }
-
+    Serial.print("Most Freq:");
+    Serial.println(mostFrequentInt);
     return mostFrequentInt;
 }
 
@@ -259,6 +268,8 @@ int findMostFrequent(std::stack<int>& stack) {
   LED(11, chartreuse*0.5);// 240
   LED(12, yellow*0.5);    // 270
   */
+const int  arraySize = 30;
+byte tmpArr[arraySize]; 
 
 void setup() {
   // nastav piny narazniku
@@ -390,7 +401,7 @@ void loop() {
 
         //if((position == 0!b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
-          if(samples < 50){
+          if(samples < 75){
             samples++;
             break;
           }
@@ -519,7 +530,10 @@ void loop() {
         // if(!firstCross){
         //   tmp.push(previous);    
         // }
-        tmp.push(previous);     // trying this instead of -^
+        if(tmp.size()< 75){
+          tmp.push(previous);     // trying this instead of -^
+        }
+        
 
         // previous = position; //proc je tohle az tady dole?
         

@@ -4,6 +4,11 @@
 
 
 char rozpoznavani_krizovatky(byte on, byte off){ //on = co bylo na krizovatce, off = co bylo mimo krizovatku
+    if(on == 0b0011){
+        on = 0b0001;
+    } else if(on == 0b1100){
+        on = 0b1000;
+    }
     // boolean on_leva = (on & 0b01000); 
     // boolean on_stred1 = (on & 0b00100);
     // boolean on_stred2 = (on & 0b00010);
