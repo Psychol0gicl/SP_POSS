@@ -404,6 +404,9 @@ void loop() {
         }
         else if(position == 0b00001111){ // slepa
           pohyb(0,0);
+          buzzerOn();
+          buzzer.tone(440, 100);
+          buzzerOff();  
           returning = true;
           state = turn180;
         }
