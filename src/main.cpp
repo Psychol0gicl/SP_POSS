@@ -465,6 +465,9 @@ void loop() {
           } else{pohyb(0,0);}
 
           if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--
+            buzzerOn();
+            buzzer.tone(440, 100);
+            buzzerOff();
             previous = position; 
             while(!tmp.empty()){
               tmp.pop();
