@@ -390,7 +390,7 @@ void loop() {
 
         //if((position == 0!b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
-          if(samples < 30){
+          if(samples < 50){
             samples++;
             break;
           }
@@ -403,7 +403,7 @@ void loop() {
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
-          if(samples < 30){
+          if(samples < 50){
             samples++;
             break;
           }
@@ -497,7 +497,6 @@ void loop() {
             //Serial.print("Final Position: ");
             //Serial.println(position, BIN);
             char krizovatka = rozpoznavani_krizovatky(previous, position);
-            dispCrossroad(krizovatka);
             //Serial.println(krizovatka);
             krizovatky.push(krizovatka);
             switch(krizovatka){
@@ -506,6 +505,7 @@ void loop() {
               case rovne_a_doleva: state = forward; break;
               default: state = turnRight; break;
             }
+            dispCrossroad(krizovatka);
             break; // konec case crossroads
           }
         }
@@ -609,7 +609,7 @@ void loop() {
 
         //if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
-          if(samples < 10){
+          if(samples < 30){
               samples++;
               break;
             }
