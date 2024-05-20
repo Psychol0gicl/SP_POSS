@@ -403,6 +403,10 @@ void loop() {
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
+          if(samples < 30){
+            samples++;
+            break;
+          }
           pohyb(0,0);
           buzzerOn();
           buzzer.tone(440, 100);
@@ -519,7 +523,7 @@ void loop() {
 
         // previous = position; //proc je tohle az tady dole?
         
-        if(getDist() > 50 && previous == 0b00000000){ // cil nalezen
+        if(getDist() > 80 && previous == 0b00000000){ // cil nalezen
           vitezny_tanecek();
           firstCross = true;
           pohyb(0,0);
