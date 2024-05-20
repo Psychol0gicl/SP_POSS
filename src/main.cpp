@@ -190,7 +190,7 @@ void dispCrossroad(char crossroad){
     break;
     case 'x': //prusvih
       for (int i =1; i<=12;i++){
-        LED(i, red);  
+        LED(i, purple);  
       } 
     break;
   }
