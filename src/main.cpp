@@ -25,7 +25,7 @@ const int inMotorLevy2 = 46;
 
 //int rychlostJizdy = 80; //80-90 je sweet spot pro vetsinu robotu it seems
 int crossSpeed = 80;
-int forwardSpeed = 100;
+int forwardSpeed = 125;
 int rychlostJizdy = forwardSpeed;
 int zavodniRychlost = 150;
 int rychlostOtaceni = 120 ;
@@ -362,37 +362,7 @@ bool crossEnter = false;
 bool firstCross = true;
 int uMax = 60;
 
-String inputString = "";
-String inputStrNumber = "";
-char inChar = 0;
-
-// void serialEvent(){
-
-//   while(inChar != '\n'){
-//     if(Serial.available()){
-//       inChar = (char)Serial.read();
-//       if((inChar != 10) & (inChar != 13)){
-//         inputString += inChar;
-//         if(isDigit(inChar) | (inChar == '-') | (inChar == '.')){
-//           inputStrNumber += inChar;
-//         }
-//       }
-//     }
-//   }
-
-//   Serial.println(inputString);
-//   if(inputString.startsWith("f=")){
-//     zavodniRychlost = inputStrNumber.toInt();
-//   }
-//   else if(inputString.startsWith("t=")){
-//     rychlostOtaceni = inputStrNumber.toInt();
-//   }
-
-//   inputString = "";
-//   inputStrNumber = "";
-//   inChar = 0;
-// }
-
+byte samples = 0;
 
 void loop() {
   // sejmutí dat z detektoru cary
@@ -420,11 +390,16 @@ void loop() {
 
         //if((position == 0!b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
+          if(samples < 30){
+            samples++;
+            break;
+          }
           // buzzer.tone(440, 100);
           rychlostJizdy = crossSpeed;
           pohyb(rychlostJizdy,rychlostJizdy);
           distReset();
           previous = position;
+          samples = 0;
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
@@ -432,6 +407,7 @@ void loop() {
           returning = true;
           state = turn180;
         }
+        samples = 0;
       break;
       
       case crossroads:  //=============================================================================
@@ -626,11 +602,17 @@ void loop() {
 
         //if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
+          if(samples < 10){
+              samples++;
+              break;
+            }
           pohyb(zavodniRychlost,zavodniRychlost);
           distReset();
           previous = position;
+          samples = 0;
           state = crossroads;
         }
+        samples = 0;
       break;
 
       
