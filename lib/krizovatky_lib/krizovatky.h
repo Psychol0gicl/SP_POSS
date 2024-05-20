@@ -8,6 +8,6 @@
 #define zatacka_P '>';
 
 extern MeRGBLineFollower RGBLineFollower;
-char detekce_krizovatky(byte on, byte off);
+char rozpoznavani_krizovatky(byte on, byte off);
 byte detekce_zmeny(byte position);
 boolean detekce_zmeny_od_position(byte position, byte current);

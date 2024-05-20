@@ -25,7 +25,7 @@ const int inMotorLevy2 = 46;
 
 //int rychlostJizdy = 80; //80-90 je sweet spot pro vetsinu robotu it seems
 int crossSpeed = 80;
-int forwardSpeed = 125;
+int forwardSpeed = 150;
 int rychlostJizdy = forwardSpeed;
 int zavodniRychlost = 150;
 int rychlostOtaceni = 120 ;
@@ -492,7 +492,7 @@ void loop() {
             //Serial.print("   ");
             //Serial.print("Final Position: ");
             //Serial.println(position, BIN);
-            char krizovatka = detekce_krizovatky(previous, position);
+            char krizovatka = rozpoznavani_krizovatky(previous, position);
             dispCrossroad(krizovatka);
             //Serial.println(krizovatka);
             krizovatky.push(krizovatka);
