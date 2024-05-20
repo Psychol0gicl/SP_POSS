@@ -429,6 +429,9 @@ void loop() {
         }
         else if(position == 0b00001111){ // slepa
           pohyb(0,0);
+          buzzerOn();
+          buzzer.tone(440, 100);
+          buzzerOff();  
           returning = true;
           state = turn180;
         }
@@ -465,9 +468,6 @@ void loop() {
           } else{pohyb(0,0);}
 
           if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--
-            buzzerOn();
-            buzzer.tone(440, 100);
-            buzzerOff();
             previous = position; 
             while(!tmp.empty()){
               tmp.pop();
