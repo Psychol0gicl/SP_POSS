@@ -2,6 +2,8 @@
     "files.associations": {
         "stack": "cpp",
         "functional": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "initializer_list": "cpp",
+        "valarray": "cpp"
     }
 }

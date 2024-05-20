@@ -11,7 +11,7 @@
 #include "krizovatky.h"
 // mame robota cislo 11
 
-volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
+volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odectea
 
 // Levý motor
 const int pwmMotorPravy = 11;
@@ -27,8 +27,9 @@ const int inMotorLevy2 = 46;
 int crossSpeed = 80;
 int forwardSpeed = 150;
 int rychlostJizdy = forwardSpeed;
-int zavodniRychlost = 150;
-int rychlostOtaceni = 120 ;
+int zavodniRychlost = 170;
+int rychlostOtaceni = 150 ;
+int rychlostGyra = 200;
 int8_t smerJizdy = 1; // pro spravnou regulaci pri jizde rovne
 int minRychlost = 100;
 int maxRychlost = 255;
@@ -128,7 +129,6 @@ byte current = -1;
 byte previous = -1;
 std::stack<char> krizovatky;
 std::stack<char> finished;
-std::stack<int> tmp;
 
 void svit(byte position){
   if(0b00001000 & position){
@@ -221,15 +221,13 @@ void vitezny_tanecek(){
   pohyb(0,0);
 }
 
-int findMostFrequent(std::stack<int>& stack) {
+int findMostFrequent(byte array[], byte arraysize) {
     const int MAX_VALUE = 17; // Adjust this according to the range of integers in your stack
     int intCounts[MAX_VALUE] = {0}; // Initialize array to store counts
 
     // Count occurrences of each integer
-    while (!stack.empty()) {
-        int currentInt = stack.top();
-        intCounts[currentInt]++;
-        stack.pop();
+    for(byte i = 0; i < arraysize; i++){
+        intCounts[array[i]]++;
     }
 
     // Find the most frequent integer
@@ -241,7 +239,7 @@ int findMostFrequent(std::stack<int>& stack) {
             mostFrequentInt = i;
         }
     }
-
+    Serial.println(mostFrequentInt);
     return mostFrequentInt;
 }
 
@@ -363,6 +361,15 @@ bool firstCross = true;
 int uMax = 60;
 
 byte samples = 0;
+const byte arraysize = 151;
+byte tmp[arraysize];
+byte arrayIndex = 0;
+// vyprazdneni pole
+
+void emptyArray(){
+  arrayIndex = 0;
+  for(byte i = 0; i < arraysize; i++){tmp[i] = -1;} // vyprazdneni pole
+}
 
 void loop() {
   // sejmutí dat z detektoru cary
@@ -400,6 +407,7 @@ void loop() {
           distReset();
           previous = position;
           samples = 0;
+          emptyArray();
           state = crossroads;
         }
         else if(position == 0b00001111){ // slepa
@@ -441,17 +449,13 @@ void loop() {
             firstCross = false; 
             //Serial.println("first"); 
             previous = -1;
-            while(!tmp.empty()){
-              tmp.pop();
-            }
+            emptyArray();
             break;
           } else{pohyb(0,0);}
 
           if(returning){ //mod vraceni se ze slepe --.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--.--
             previous = position; 
-            while(!tmp.empty()){
-              tmp.pop();
-            }
+            emptyArray();
             char krizovatka = krizovatky.top();
             //Serial.print("Returning Krizovatka: ");
             //Serial.println(krizovatka);
@@ -486,11 +490,11 @@ void loop() {
               break;
                 
             }
-            break; // konec case crossroads
+            break;
 
           }
           else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.----.--.--.--.--.--.--.--.--.--.--.--.--.--.--
-            previous = findMostFrequent(tmp); //nemam tuseni jestli tohle bude fungovat, ale za pokus nic nedam    
+            previous = findMostFrequent(tmp, arraysize); //nemam tuseni jestli tohle bude fungovat, ale za pokus nic nedam    
             //Serial.print("Final Previous: ");
             //Serial.print(previous, BIN);
             //Serial.print("   ");
@@ -506,7 +510,8 @@ void loop() {
               default: state = turnRight; break;
             }
             dispCrossroad(krizovatka);
-            break; // konec case crossroads
+
+            break;
           }
         }
         //Serial.print("Previous: ");
@@ -519,7 +524,8 @@ void loop() {
         // if(!firstCross){
         //   tmp.push(previous);    
         // }
-        tmp.push(previous);     // trying this instead of -^
+        if(arrayIndex < arraysize){tmp[arrayIndex] = previous;}     // trying this instead of -^
+        arrayIndex++;
 
         // previous = position; //proc je tohle az tady dole?
         
@@ -643,9 +649,7 @@ void loop() {
             firstCross = false; 
             //Serial.println("first"); 
             previous = -1;
-            while(!tmp.empty()){ //tady je to jedno
-              tmp.pop();
-            }
+            emptyArray();
             break;
             
           } else{pohyb(0,0); }

@@ -89,7 +89,7 @@ bool otacej_dle_offsetu(int offset, int8_t smer){
 
 void turn(byte angle, int8_t smer){ // gyroskop umi max +- 179.9
   gyro.begin();       // + znamena doprava
-  pohyb(rychlostOtaceni*smer, -rychlostOtaceni*smer);
+  pohyb(rychlostGyra*smer, -rychlostGyra*smer);
   while(abs(gyro.getAngleZ()) < angle){gyro.update();}
   pohyb(0, 0);
 }
