@@ -10,7 +10,7 @@
 #include "regulation.h"
 #include "krizovatky.h"
 // mame robota cislo 11
-//cas zavodu 36 
+// cas zavodu 36 
 
 volatile int rozdilPasu = 0; // hodnota, ktera se pricte k jedne rychlosti a od druhe se odecte
 
@@ -24,7 +24,6 @@ const int pwmMotorLevy = 10;
 const int inMotorLevy1 = 47;
 const int inMotorLevy2 = 46;
 
-//int rychlostJizdy = 80; //80-90 je sweet spot pro vetsinu robotu it seems
 int crossSpeed = 80;
 int forwardSpeed = 150;
 int rychlostJizdy = forwardSpeed;
@@ -39,7 +38,7 @@ int maxRychlost = 255;
 #define kriz '+'
 #define tecko 'T'
 #define rovne_a_doleva  '3'
-#define rovne_a_doprava 'E' // define bez stredniku
+#define rovne_a_doprava 'E' 
 #define zatacka_L '<'
 #define zatacka_P '>'
 #define rovne '|'
@@ -223,24 +222,13 @@ void vitezny_tanecek(){
 }
 
 int findMostFrequent(std::stack<int>& stack) {
-    // Serial.println(stack.size());
-    const int MAX_VALUE = 17; // Adjust this according to the range of integers in your stack
-    int intCounts[MAX_VALUE] = {0}; // Initialize array to store counts
-
-    // Count occurrences of each integer
+    const int MAX_VALUE = 17; 
+    int intCounts[MAX_VALUE] = {0}; 
     while (!stack.empty()) {
         int currentInt = stack.top();
         intCounts[currentInt]++;
         stack.pop();
     }
-    Serial.println('n');
-    for(int i = 0; i < MAX_VALUE; i++){
-      Serial.print("i:");
-      Serial.println(i);
-      Serial.println(intCounts[i]);
-      
-    }
-    // Find the most frequent integer
     int mostFrequentInt;
     int maxCount = 0;
     for (int i = 0; i < MAX_VALUE; ++i) {
@@ -249,25 +237,9 @@ int findMostFrequent(std::stack<int>& stack) {
             mostFrequentInt = i;
         }
     }
-    Serial.print("Most Freq:");
-    Serial.println(mostFrequentInt);
     return mostFrequentInt;
 }
 
-/*
-  LED(1, amber*0.5); // 300
-  LED(2, orange*0.5); // 330
-  LED(3, vermillion*0.5); // 0
-  LED(4, red*0.5);  // 30
-  LED(5, magenta*0.5); // 60
-  LED(6, purple*0.5); // 90
-  LED(7, indigo*0.5); // 120
-  LED(8, blue*0.5);   // 150
-  LED(9, aquamarine*0.5); // 180
-  LED(10, green*0.5);     // 210
-  LED(11, chartreuse*0.5);// 240
-  LED(12, yellow*0.5);    // 270
-  */
 const int  arraySize = 30;
 byte tmpArr[arraySize]; 
 
@@ -332,21 +304,6 @@ void setup() {
     svit(RGBLineFollower.getPositionState());
     // nepokracuj dokud neni stiknut levy naraznik
   }
-
-  // inicializace casovace pro regulator
-  // Timer3.initialize(int(Ts*1000000));
-  // Timer3.attachInterrupt(calc_pid); 
-//   finished.push(kriz);
-//   finished.push(zatacka_L);
-//   finished.push(zatacka_L);
-//   finished.push(rovne_a_doleva);
-// finished.push(zatacka_P);
-// finished.push(zatacka_P);
-// finished.push(zatacka_L);
-// finished.push(zatacka_P);
-// finished.push(zatacka_L);
-// finished.push(rovne_a_doleva);
-// mapping = false;
 }
 
 
@@ -382,10 +339,6 @@ void loop() {
   svit(position);
   if(returning){LED(8, red); LED(10,red);}
   else{LED(8, black); LED(10,black);}
-  // switch(position){// necessary evil
-  //   case 0b1000: position = 0b0001; break; 
-  //   case 0b0001: position = 0b1000; break; 
-  // }
   offset = RGBLineFollower.getPositionOffset();
 
   if(mapping){// mapovaci rezim
@@ -398,14 +351,12 @@ void loop() {
         if(offset > uMax ) {offset = uMax;} //regulace
         else if(offset < -uMax) {offset = -uMax;}
         pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
-
-        //if((position == 0!b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
           if(samples < 75){
             samples++;
             break;
           }
-          // buzzer.tone(440, 100);
+
           rychlostJizdy = crossSpeed;
           pohyb(rychlostJizdy,rychlostJizdy);
           distReset();
@@ -438,19 +389,16 @@ void loop() {
         } // mezistavy - neni plne z krizovatky, ale ohlasil by zmenu
         
         if(previous == 0b00000000 && (position == 0b00001000 || position == 0b00000001)){break;} // nedetekoval by kriz, ktery tam ve skutecnosti je
-        //if(position == 0b00000000 && (previous == 0b00001000 || previous == 0b00000001) && getDist() > 1){break;}
         if(position == 0b00001000 && previous == 0b00000001){break;}
-        if(position == 0b00000001 && previous == 0b00001000){break;} // nove nevalidni stavy
+        if(position == 0b00000001 && previous == 0b00001000){break;} //nevalidni stavy
         
         if(getDist() > 25 && (position == 0b00001001 || position == 0b00001111)){ //vyjeli jsme z krizovatky
           pohyb(rychlostJizdy, rychlostJizdy);
           while(getDist() < 75){} 
-          // delay(200);
           rychlostJizdy = forwardSpeed;
-          if(firstCross){
+          if(firstCross){ //osetreni prvniho krize
             state = forward; 
             firstCross = false; 
-            //Serial.println("first"); 
             previous = -1;
             while(!tmp.empty()){
               tmp.pop();
@@ -464,8 +412,6 @@ void loop() {
               tmp.pop();
             }
             char krizovatka = krizovatky.top();
-            //Serial.print("Returning Krizovatka: ");
-            //Serial.println(krizovatka);
             krizovatky.pop();
             switch(krizovatka){
               case zatacka_L: state = turnRight; break;
@@ -501,14 +447,8 @@ void loop() {
 
           }
           else{ // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.----.--.--.--.--.--.--.--.--.--.--.--.--.--.--
-            previous = findMostFrequent(tmp); //nemam tuseni jestli tohle bude fungovat, ale za pokus nic nedam    
-            //Serial.print("Final Previous: ");
-            //Serial.print(previous, BIN);
-            //Serial.print("   ");
-            //Serial.print("Final Position: ");
-            //Serial.println(position, BIN);
+            previous = findMostFrequent(tmp);
             char krizovatka = rozpoznavani_krizovatky(previous, position);
-            //Serial.println(krizovatka);
             krizovatky.push(krizovatka);
             switch(krizovatka){
               case zatacka_L: state = turnLeft; break;
@@ -520,23 +460,10 @@ void loop() {
             break; // konec case crossroads
           }
         }
-        //Serial.print("Previous: ");
-        //Serial.print(previous, BIN);
-        //Serial.print("   ");
-        //Serial.print("Position: ");
-        //Serial.println(position, BIN);
-
         previous = position;
-        // if(!firstCross){
-        //   tmp.push(previous);    
-        // }
         if(tmp.size()< 75){
-          tmp.push(previous);     // trying this instead of -^
+          tmp.push(previous);
         }
-        
-
-        // previous = position; //proc je tohle az tady dole?
-        
         if(getDist() > 80 && previous == 0b00000000){ // cil nalezen
           vitezny_tanecek();
           firstCross = true;
@@ -555,7 +482,6 @@ void loop() {
             svit(position);
             LED(7, green); 
             LED(11, green);  
-            //if(Serial.available()){speedChange();}
             }
           break;
         }
@@ -563,31 +489,23 @@ void loop() {
       break; // konec case crossroads
 
       case turnRight: //=============================================================================
-        // offset = RGBLineFollower.getPositionOffset();
         if(!started){
           turn(45, 1); 
           started = true; 
           RGBLineFollower.loop();
-          position = RGBLineFollower.getPositionState(); // HERE - ale nemelo by to funkci  otacej_dokud_nenajdes_caru() vadit
+          position = RGBLineFollower.getPositionState();
         }  
 
-        // if(offset > uMax){offset = uMax;}
-        // else if(offset < -uMax){offset = -uMax;}
-        // pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);  
         if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
       break;
 
       case turnLeft: //=============================================================================
-        // offset = RGBLineFollower.getPositionOffset();
         if(!started){
           turn(45, -1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState(); // HERE
         } 
-        // if(offset > uMax){offset = uMax;}
-        // else if(offset < -uMax){offset = -uMax;}
-        // pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }        
       break;
 
@@ -599,11 +517,7 @@ void loop() {
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState();
         }  
-        // if(offset > uMax){offset = uMax;}
-        // else if(offset < -uMax){offset = -uMax;}
-        // pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);  
         if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
-
       break;
     }
   }
@@ -620,8 +534,6 @@ void loop() {
         if(offset > uMax ) {offset = uMax;} //regulace
         else if(offset < -uMax) {offset = -uMax;}
         pohyb(smerJizdy*zavodniRychlost + smerJizdy*offset, smerJizdy*zavodniRychlost - smerJizdy*offset);
-
-        //if((position == 0b00000001) || (position == 0b00001000) || (position == 0b00000000)){ // krizovatka
         if((~position & 0b00001001) != 0){ // krizovatka
           if(samples < 30){
               samples++;
@@ -655,40 +567,25 @@ void loop() {
           if(firstCross){
             state = forward; 
             firstCross = false; 
-            //Serial.println("first"); 
             previous = -1;
             while(!tmp.empty()){ //tady je to jedno
               tmp.pop();
             }
             break;
             
-          } else{pohyb(0,0); }
-          //  // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.----.--.--.--.--.--.--.--.--.--.--.--.--.--.--
-          //   Serial.print("Final Previous: ");
-          //   Serial.print(previous, BIN);
-          //   Serial.print("   ");
-          //   Serial.print("Final Position: ");
-          //   Serial.println(position, BIN);
-            char krizovatka =  finished.top();
-            krizovatky.push(krizovatka);
-            finished.pop();
-            dispCrossroad(krizovatka);
-            Serial.println(krizovatka);
-            switch(krizovatka){
-              case zatacka_L: state = turnLeft; break;
-              case zatacka_P: state = turnRight; break;
-              case rovne_a_doleva: state = forward; break;
-              default: state = turnRight; break;
-            }
-            // delay(300);
-            break; // konec case crossroads
-          
+          } else{pohyb(0,0); }  // normalni mod bez vraceni --.--.--.--.--.--.--.--.--.--.--.--.--.--.----.--.--.--.--.--.--.--.--.--.--.--.--.--.--
+          char krizovatka =  finished.top();
+          krizovatky.push(krizovatka);
+          finished.pop();
+          dispCrossroad(krizovatka);
+          switch(krizovatka){
+            case zatacka_L: state = turnLeft; break;
+            case zatacka_P: state = turnRight; break;
+            case rovne_a_doleva: state = forward; break;
+            default: state = turnRight; break;
+          }
+          break; // konec case crossroads
         }
-        // Serial.print("Previous: ");
-        // Serial.print(previous, BIN);
-        // Serial.print("   ");
-        // Serial.print("Position: ");
-        // Serial.println(position, BIN);
         if(finished.empty() && position == 0b00000){ // cil nalezen
           vitezny_tanecek();
           pohyb(0,0);
@@ -704,7 +601,6 @@ void loop() {
           svit(position);
             LED(7, green); 
             LED(11, green);  
-            //if(Serial.available()){speedChange();}
           }
              for (int i =1; i<=12;i++){
                     LED(i, black); 
@@ -717,46 +613,34 @@ void loop() {
 
       case turnRight: //=============================================================================
         position = RGBLineFollower.getPositionState(); // HERE
-        // offset = RGBLineFollower.getPositionOffset();
         if(!started){
           turn(45, 1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState();
         }
-        // if(offset > uMax){offset = uMax;}
-        // else if(offset < -uMax){offset = -uMax;}
-        // pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
         if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }
       break;
 
       case turnLeft: //=============================================================================
         position = RGBLineFollower.getPositionState(); // HERE
-        // offset = RGBLineFollower.getPositionOffset(); 
         if(!started){
           turn(45, -1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState();
         }
-        // if(offset > uMax){offset = uMax;}
-        // else if(offset < -uMax){offset = -uMax;}
-        // pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);
         if( otacej_dokud_nenajdes_caru(position, -1) ){started = false; state = forward; }  
       break;
 
       case turn180:
         position = RGBLineFollower.getPositionState();
-        // offset = RGBLineFollower.getPositionOffset();
         if(!started){
           turn(160, 1); 
           started = true; 
           RGBLineFollower.loop();
           position = RGBLineFollower.getPositionState();
         }  
-        // if(offset > uMax){offset = uMax;}
-        // else if(offset < -uMax){offset = -uMax;}
-        // pohyb(smerJizdy*rychlostJizdy + smerJizdy*offset, smerJizdy*rychlostJizdy - smerJizdy*offset);  
         if( otacej_dokud_nenajdes_caru(position, 1) ){started = false; state = forward; }        
       break;
     }
